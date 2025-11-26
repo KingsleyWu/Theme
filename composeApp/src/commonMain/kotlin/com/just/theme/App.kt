@@ -1,23 +1,22 @@
 package com.just.theme
 
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.foundation.background
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
-import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import kotlinx.coroutines.launch
 import org.jetbrains.compose.ui.tooling.preview.Preview
 import kotlin.math.roundToInt
-import kotlinx.coroutines.launch
 
 @Composable
 @Preview
@@ -103,7 +102,8 @@ fun ColorSchemeGallery(onEditClick: (() -> Unit)? = null) {
                 var showIcon by remember { mutableStateOf(false) }
                 var radius by remember { mutableStateOf(12f) }
                 var outline by remember { mutableStateOf(1f) }
-                var elevated by remember { mutableStateOf(false) }
+                var iconContainer by remember { mutableStateOf(false) }
+                var elevIndex by remember { mutableStateOf(0) }
                 Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                     Row(horizontalArrangement = Arrangement.spacedBy(12.dp), verticalAlignment = Alignment.CenterVertically) {
                         LabeledSwitch("启用", enabled) { enabled = it }
@@ -122,17 +122,23 @@ fun ColorSchemeGallery(onEditClick: (() -> Unit)? = null) {
                         LabeledSwitch("Outlined", showOutlined) { showOutlined = it }
                         LabeledSwitch("Text", showText) { showText = it }
                         LabeledSwitch("Icon", showIcon) { showIcon = it }
-                        LabeledSwitch("海拔", elevated) { elevated = it }
+                        LabeledSwitch("Icon容器变体", iconContainer) { iconContainer = it }
                     }
                     Row(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
                         Text("圆角")
                         Slider(value = radius, onValueChange = { radius = it }, valueRange = 0f..32f, modifier = Modifier.weight(1f))
-                        Text(radius.toString())
+                        Text(radius.roundToInt().toString())
                     }
                     Row(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
                         Text("轮廓")
                         Slider(value = outline, onValueChange = { outline = it }, valueRange = 0f..4f, modifier = Modifier.weight(1f))
-                        Text(outline.toString())
+                        Text(outline.roundToInt().toString())
+                    }
+                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
+                        Text("海拔")
+                        Slider(value = elevIndex.toFloat(), onValueChange = { elevIndex = it.roundToInt().coerceIn(0, 3) }, valueRange = 0f..3f, steps = 3, modifier = Modifier.weight(1f))
+                        val elevLabel = listOf(0, 2, 6, 8)[elevIndex]
+                        Text("${elevLabel}dp")
                     }
                     val accent = when (source) {
                         0 -> colors.primary
@@ -155,18 +161,21 @@ fun ColorSchemeGallery(onEditClick: (() -> Unit)? = null) {
                         else -> colors.onTertiaryContainer
                     }
                     val shape = RoundedCornerShape(radius.roundToInt().dp)
+                    val elevDp = listOf(0.dp, 2.dp, 6.dp, 8.dp)[elevIndex]
                     Row(horizontalArrangement = Arrangement.spacedBy(12.dp), verticalAlignment = Alignment.CenterVertically) {
-                        if (showFilled) {
-                            if (elevated) {
-                                ElevatedButton(onClick = {}, enabled = enabled, shape = shape) { Text("Filled") }
-                            } else {
-                                Button(onClick = {}, enabled = enabled, shape = shape, colors = ButtonDefaults.buttonColors(containerColor = accent, contentColor = onAccent)) { Text("Filled") }
-                            }
-                        }
-                        if (showTonal) FilledTonalButton(onClick = {}, enabled = enabled, shape = shape, colors = ButtonDefaults.filledTonalButtonColors(containerColor = accentContainer, contentColor = onAccentContainer)) { Text("Tonal") }
+                        if (showFilled) Button(onClick = {}, enabled = enabled, shape = shape, colors = ButtonDefaults.buttonColors(containerColor = accent, contentColor = onAccent), elevation = ButtonDefaults.buttonElevation(defaultElevation = elevDp)) { Text("Filled") }
+                        if (showTonal) FilledTonalButton(onClick = {}, enabled = enabled, shape = shape, colors = ButtonDefaults.filledTonalButtonColors(containerColor = accentContainer, contentColor = onAccentContainer), elevation = ButtonDefaults.buttonElevation(defaultElevation = elevDp)) { Text("Tonal") }
                         if (showOutlined) OutlinedButton(onClick = {}, enabled = enabled, shape = shape, border = BorderStroke(outline.dp, accent), colors = ButtonDefaults.outlinedButtonColors(contentColor = accent)) { Text("Outlined") }
                         if (showText) TextButton(onClick = {}, enabled = enabled, shape = shape, colors = ButtonDefaults.textButtonColors(contentColor = accent)) { Text("Text") }
-                        if (showIcon) IconButton(onClick = {}, enabled = enabled) { Text("☆", color = accent) }
+                        if (showIcon) {
+                            if (iconContainer) {
+                                Surface(color = accentContainer, shape = shape) {
+                                    IconButton(onClick = {}, enabled = enabled) { Text("☆", color = onAccentContainer) }
+                                }
+                            } else {
+                                IconButton(onClick = {}, enabled = enabled) { Text("☆", color = accent) }
+                            }
+                        }
                         Token(accent, onAccent, "accent")
                         Token(accentContainer, onAccentContainer, "accentContainer")
                     }
@@ -193,7 +202,7 @@ fun ColorSchemeGallery(onEditClick: (() -> Unit)? = null) {
                         Button(
                             onClick = {},
                             enabled = enabled,
-                            colors = androidx.compose.material3.ButtonDefaults.buttonColors(
+                            colors = ButtonDefaults.buttonColors(
                                 containerColor = colors.secondary,
                                 contentColor = colors.onSecondary
                             )
@@ -223,7 +232,7 @@ fun ColorSchemeGallery(onEditClick: (() -> Unit)? = null) {
                     LabeledSwitch("容器变体", useContainer) { useContainer = it }
                     val container = if (useContainer) colors.tertiaryContainer else colors.tertiary
                     val content = if (useContainer) colors.onTertiaryContainer else colors.onTertiary
-                    androidx.compose.material3.Card(colors = CardDefaults.cardColors(containerColor = container)) {
+                    Card(colors = CardDefaults.cardColors(containerColor = container)) {
                         Box(modifier = Modifier.size(140.dp, 60.dp), contentAlignment = Alignment.Center) {
                             Text("Tertiary", color = content)
                         }
@@ -346,6 +355,8 @@ fun ColorSchemeGallery(onEditClick: (() -> Unit)? = null) {
                         Text("Secondary")
                         RadioButton(selected = source == 2, onClick = { source = 2 })
                         Text("Tertiary")
+                    }
+                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
                         LabeledSwitch("禁用错误对比", showDisabledError) { showDisabledError = it }
                         LabeledSwitch("禁用占位可见", disabledPlaceholderVisible) { disabledPlaceholderVisible = it }
                         LabeledSwitch("填充型", showFilledField) { showFilledField = it }
