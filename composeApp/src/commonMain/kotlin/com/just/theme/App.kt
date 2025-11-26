@@ -287,7 +287,10 @@ fun ColorSchemeGallery(onEditClick: (() -> Unit)? = null) {
                 var showCounter by remember { mutableStateOf(false) }
                 var leading by remember { mutableStateOf(false) }
                 var trailing by remember { mutableStateOf(false) }
+                var showDisabledError by remember { mutableStateOf(false) }
+                var source by remember { mutableStateOf(0) }
                 val max = 20
+                val accent = when (source) { 0 -> colors.primary; 1 -> colors.secondary; else -> colors.tertiary }
                 Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                     Row(horizontalArrangement = Arrangement.spacedBy(12.dp), verticalAlignment = Alignment.CenterVertically) {
                         LabeledSwitch("启用", enabled) { enabled = it }
@@ -298,22 +301,62 @@ fun ColorSchemeGallery(onEditClick: (() -> Unit)? = null) {
                         LabeledSwitch("前缀", leading) { leading = it }
                         LabeledSwitch("后缀", trailing) { trailing = it }
                     }
-                    OutlinedTextField(
-                        value = textValue,
-                        onValueChange = { if (it.length <= max) textValue = it },
-                        label = { Text("输入") },
-                        isError = isError,
-                        enabled = enabled,
-                        placeholder = { if (showPlaceholder) Text("Placeholder") },
-                        supportingText = {
-                            val parts = mutableListOf<@Composable () -> Unit>()
-                            if (showHelp) parts.add({ Text("辅助信息示例") })
-                            if (showCounter) parts.add({ Text("${textValue.length}/$max") })
-                            if (parts.isNotEmpty()) Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) { parts.forEach { it() } }
-                        },
-                        leadingIcon = { if (leading) Text("@") },
-                        trailingIcon = { if (trailing) Text("#") }
-                    )
+                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
+                        RadioButton(selected = source == 0, onClick = { source = 0 })
+                        Text("Primary")
+                        RadioButton(selected = source == 1, onClick = { source = 1 })
+                        Text("Secondary")
+                        RadioButton(selected = source == 2, onClick = { source = 2 })
+                        Text("Tertiary")
+                        LabeledSwitch("禁用错误对比", showDisabledError) { showDisabledError = it }
+                    }
+                    Row(horizontalArrangement = Arrangement.spacedBy(16.dp), verticalAlignment = Alignment.CenterVertically) {
+                        OutlinedTextField(
+                            value = textValue,
+                            onValueChange = { if (it.length <= max) textValue = it },
+                            label = { Text("输入") },
+                            isError = isError,
+                            enabled = enabled,
+                            placeholder = { if (showPlaceholder) Text("Placeholder") },
+                            supportingText = {
+                                val parts = mutableListOf<@Composable () -> Unit>()
+                                if (showHelp) parts.add({ Text("辅助信息示例") })
+                                if (showCounter) parts.add({ Text("${textValue.length}/$max") })
+                                if (parts.isNotEmpty()) Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) { parts.forEach { it() } }
+                            },
+                            leadingIcon = { if (leading) Text("@") },
+                            trailingIcon = { if (trailing) Text("#") },
+                            colors = TextFieldDefaults.colors(
+                                focusedIndicatorColor = accent,
+                                cursorColor = accent,
+                                focusedLabelColor = accent,
+                                errorIndicatorColor = colors.error,
+                                errorCursorColor = colors.error,
+                                errorLabelColor = colors.error,
+                            )
+                        )
+                        if (showDisabledError) {
+                            OutlinedTextField(
+                                value = textValue,
+                                onValueChange = {},
+                                label = { Text("禁用+错误") },
+                                isError = true,
+                                enabled = false,
+                                placeholder = { if (showPlaceholder) Text("Placeholder") },
+                                supportingText = { if (showHelp) Text("辅助信息示例") },
+                                leadingIcon = { if (leading) Text("@") },
+                                trailingIcon = { if (trailing) Text("#") },
+                                colors = TextFieldDefaults.colors(
+                                    focusedIndicatorColor = accent,
+                                    cursorColor = accent,
+                                    focusedLabelColor = accent,
+                                    errorIndicatorColor = colors.error,
+                                    errorCursorColor = colors.error,
+                                    errorLabelColor = colors.error,
+                                )
+                            )
+                        }
+                    }
                 }
             }
 
