@@ -16,6 +16,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import org.jetbrains.compose.ui.tooling.preview.Preview
 import kotlin.math.roundToInt
+import kotlinx.coroutines.launch
 
 @Composable
 @Preview
@@ -44,6 +45,7 @@ fun App() {
 fun ColorSchemeGallery(onEditClick: (() -> Unit)? = null) {
     val colors = MaterialTheme.colorScheme
     val hostState = remember { SnackbarHostState() }
+    val scope = rememberCoroutineScope()
     var snackbarCounter by remember { mutableStateOf(0) }
     var showOverlay by remember { mutableStateOf(false) }
     var textValue by remember { mutableStateOf("") }
@@ -56,8 +58,7 @@ fun ColorSchemeGallery(onEditClick: (() -> Unit)? = null) {
             TopAppBar(title = { Text("ColorScheme 示例") }, actions = {
                 TextButton(onClick = { onEditClick?.invoke() }) { Text("编辑颜色") }
             })
-        },
-        snackbarHost = { SnackbarHost(hostState) }
+        }
     ) { paddingValues ->
         Column(
             modifier = Modifier
@@ -83,6 +84,57 @@ fun ColorSchemeGallery(onEditClick: (() -> Unit)? = null) {
                     TextButton(onClick = {}, enabled = enabledPrimary) { Text("TextButton") }
                     Token(colors.primary, colors.onPrimary, "primary/onPrimary")
                     Token(colors.primaryContainer, colors.onPrimaryContainer, "primaryContainer/onPrimaryContainer")
+                }
+            }
+
+            Section(
+                title = "按钮形态对比",
+                desc = listOf(
+                    "Filled/Tonal/Outlined/Text 的并列比较。",
+                )
+            ) {
+                var enabled by remember { mutableStateOf(true) }
+                var source by remember { mutableStateOf(0) }
+                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    Row(horizontalArrangement = Arrangement.spacedBy(12.dp), verticalAlignment = Alignment.CenterVertically) {
+                        LabeledSwitch("启用", enabled) { enabled = it }
+                        Row(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
+                            RadioButton(selected = source == 0, onClick = { source = 0 })
+                            Text("Primary")
+                            RadioButton(selected = source == 1, onClick = { source = 1 })
+                            Text("Secondary")
+                            RadioButton(selected = source == 2, onClick = { source = 2 })
+                            Text("Tertiary")
+                        }
+                    }
+                    val accent = when (source) {
+                        0 -> colors.primary
+                        1 -> colors.secondary
+                        else -> colors.tertiary
+                    }
+                    val onAccent = when (source) {
+                        0 -> colors.onPrimary
+                        1 -> colors.onSecondary
+                        else -> colors.onTertiary
+                    }
+                    val accentContainer = when (source) {
+                        0 -> colors.primaryContainer
+                        1 -> colors.secondaryContainer
+                        else -> colors.tertiaryContainer
+                    }
+                    val onAccentContainer = when (source) {
+                        0 -> colors.onPrimaryContainer
+                        1 -> colors.onSecondaryContainer
+                        else -> colors.onTertiaryContainer
+                    }
+                    Row(horizontalArrangement = Arrangement.spacedBy(12.dp), verticalAlignment = Alignment.CenterVertically) {
+                        Button(onClick = {}, enabled = enabled, colors = ButtonDefaults.buttonColors(containerColor = accent, contentColor = onAccent)) { Text("Filled") }
+                        FilledTonalButton(onClick = {}, enabled = enabled, colors = ButtonDefaults.filledTonalButtonColors(containerColor = accentContainer, contentColor = onAccentContainer)) { Text("Tonal") }
+                        OutlinedButton(onClick = {}, enabled = enabled, colors = ButtonDefaults.outlinedButtonColors(contentColor = accent)) { Text("Outlined") }
+                        TextButton(onClick = {}, enabled = enabled, colors = ButtonDefaults.textButtonColors(contentColor = accent)) { Text("Text") }
+                        Token(accent, onAccent, "accent")
+                        Token(accentContainer, onAccentContainer, "accentContainer")
+                    }
                 }
             }
 
@@ -223,6 +275,49 @@ fun ColorSchemeGallery(onEditClick: (() -> Unit)? = null) {
             }
 
             Section(
+                title = "输入框状态",
+                desc = listOf(
+                    "错误态与辅助文本展示。",
+                )
+            ) {
+                var enabled by remember { mutableStateOf(true) }
+                var isError by remember { mutableStateOf(false) }
+                var showHelp by remember { mutableStateOf(false) }
+                var showPlaceholder by remember { mutableStateOf(true) }
+                var showCounter by remember { mutableStateOf(false) }
+                var leading by remember { mutableStateOf(false) }
+                var trailing by remember { mutableStateOf(false) }
+                val max = 20
+                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    Row(horizontalArrangement = Arrangement.spacedBy(12.dp), verticalAlignment = Alignment.CenterVertically) {
+                        LabeledSwitch("启用", enabled) { enabled = it }
+                        LabeledSwitch("错误", isError) { isError = it }
+                        LabeledSwitch("帮助", showHelp) { showHelp = it }
+                        LabeledSwitch("占位", showPlaceholder) { showPlaceholder = it }
+                        LabeledSwitch("计数", showCounter) { showCounter = it }
+                        LabeledSwitch("前缀", leading) { leading = it }
+                        LabeledSwitch("后缀", trailing) { trailing = it }
+                    }
+                    OutlinedTextField(
+                        value = textValue,
+                        onValueChange = { if (it.length <= max) textValue = it },
+                        label = { Text("输入") },
+                        isError = isError,
+                        enabled = enabled,
+                        placeholder = { if (showPlaceholder) Text("Placeholder") },
+                        supportingText = {
+                            val parts = mutableListOf<@Composable () -> Unit>()
+                            if (showHelp) parts.add({ Text("辅助信息示例") })
+                            if (showCounter) parts.add({ Text("${textValue.length}/$max") })
+                            if (parts.isNotEmpty()) Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) { parts.forEach { it() } }
+                        },
+                        leadingIcon = { if (leading) Text("@") },
+                        trailingIcon = { if (trailing) Text("#") }
+                    )
+                }
+            }
+
+            Section(
                 title = "错误与反馈",
                 desc = listOf(
                     "error：错误/警示的强调色。",
@@ -240,7 +335,7 @@ fun ColorSchemeGallery(onEditClick: (() -> Unit)? = null) {
                     Button(
                         onClick = {},
                         enabled = enabled,
-                        colors = androidx.compose.material3.ButtonDefaults.buttonColors(
+                        colors = ButtonDefaults.buttonColors(
                             containerColor = if (useContainer) colors.errorContainer else colors.error,
                             contentColor = if (useContainer) colors.onErrorContainer else colors.onError
                         )
@@ -294,16 +389,39 @@ fun ColorSchemeGallery(onEditClick: (() -> Unit)? = null) {
             ) {
                 var enabled by remember { mutableStateOf(true) }
                 var action by remember { mutableStateOf(false) }
-                Row(horizontalArrangement = Arrangement.spacedBy(12.dp), verticalAlignment = Alignment.CenterVertically) {
-                    LabeledSwitch("启用", enabled) { enabled = it }
-                    LabeledSwitch("Action", action) { action = it }
-                    Button(onClick = { if (enabled) snackbarCounter++ }) { Text("显示 Snackbar") }
-                    Token(colors.inverseSurface, colors.inverseOnSurface, "inverseSurface/inverseOnSurface")
-                    Token(colors.inversePrimary, colors.onSurface, "inversePrimary")
+                var top by remember { mutableStateOf(false) }
+                var long by remember { mutableStateOf(false) }
+                var indefinite by remember { mutableStateOf(false) }
+                val duration = when {
+                    indefinite -> SnackbarDuration.Indefinite
+                    long -> SnackbarDuration.Long
+                    else -> SnackbarDuration.Short
                 }
-                LaunchedEffect(snackbarCounter, action) {
-                    if (snackbarCounter > 0) {
-                        hostState.showSnackbar("这是一条消息", actionLabel = if (action) "OK" else null)
+                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    Row(horizontalArrangement = Arrangement.spacedBy(12.dp), verticalAlignment = Alignment.CenterVertically) {
+                        LabeledSwitch("启用", enabled) { enabled = it }
+                        LabeledSwitch("Action", action) { action = it }
+                        LabeledSwitch("顶部", top) { top = it }
+                        LabeledSwitch("长时长", long) { long = it }
+                        LabeledSwitch("无限", indefinite) { indefinite = it }
+                        Button(onClick = {
+                            if (enabled) {
+                                scope.launch {
+                                    hostState.showSnackbar(
+                                        message = "这是一条消息",
+                                        actionLabel = if (action) "OK" else null,
+                                        duration = duration
+                                    )
+                                }
+                            }
+                        }) { Text("显示 Snackbar") }
+                    }
+                    Box(modifier = Modifier.fillMaxWidth(), contentAlignment = if (top) Alignment.TopCenter else Alignment.BottomCenter) {
+                        SnackbarHost(hostState = hostState)
+                    }
+                    Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                        Token(colors.inverseSurface, colors.inverseOnSurface, "inverseSurface/inverseOnSurface")
+                        Token(colors.inversePrimary, colors.onSurface, "inversePrimary")
                     }
                 }
             }
