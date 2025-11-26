@@ -8,10 +8,23 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.filled.Star
+import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material.icons.filled.Share
+import androidx.compose.material.icons.filled.Close
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.PressInteraction
+import androidx.compose.foundation.interaction.FocusInteraction
+import androidx.compose.foundation.interaction.HoverInteraction
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.launch
@@ -46,7 +59,6 @@ fun ColorSchemeGallery(onEditClick: (() -> Unit)? = null) {
     val colors = MaterialTheme.colorScheme
     val hostState = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
-    var snackbarCounter by remember { mutableStateOf(0) }
     var showOverlay by remember { mutableStateOf(false) }
     var textValue by remember { mutableStateOf("") }
     var checked by remember { mutableStateOf(true) }
@@ -99,10 +111,17 @@ fun ColorSchemeGallery(onEditClick: (() -> Unit)? = null) {
                 var showTonal by remember { mutableStateOf(true) }
                 var showOutlined by remember { mutableStateOf(true) }
                 var showText by remember { mutableStateOf(true) }
-                var showIcon by remember { mutableStateOf(false) }
+                var showIconPlain by remember { mutableStateOf(false) }
+                var showIconFilled by remember { mutableStateOf(false) }
+                var showIconTonal by remember { mutableStateOf(false) }
+                var showIconOutlined by remember { mutableStateOf(false) }
                 var radius by remember { mutableStateOf(12f) }
                 var outline by remember { mutableStateOf(1f) }
-                var iconContainer by remember { mutableStateOf(false) }
+                var iconOutlinedRadius by remember { mutableStateOf(12f) }
+                var iconOutline by remember { mutableStateOf(1f) }
+                var iconSize by remember { mutableStateOf(24f) }
+                var iconPadding by remember { mutableStateOf(8f) }
+                var iconType by remember { mutableStateOf(0) }
                 var elevIndex by remember { mutableStateOf(0) }
                 Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                     Row(horizontalArrangement = Arrangement.spacedBy(12.dp), verticalAlignment = Alignment.CenterVertically) {
@@ -121,8 +140,12 @@ fun ColorSchemeGallery(onEditClick: (() -> Unit)? = null) {
                         LabeledSwitch("Tonal", showTonal) { showTonal = it }
                         LabeledSwitch("Outlined", showOutlined) { showOutlined = it }
                         LabeledSwitch("Text", showText) { showText = it }
-                        LabeledSwitch("Icon", showIcon) { showIcon = it }
-                        LabeledSwitch("Icon容器变体", iconContainer) { iconContainer = it }
+                    }
+                    Row(horizontalArrangement = Arrangement.spacedBy(12.dp), verticalAlignment = Alignment.CenterVertically) {
+                        LabeledSwitch("Icon", showIconPlain) { showIconPlain = it }
+                        LabeledSwitch("IconFilled", showIconFilled) { showIconFilled = it }
+                        LabeledSwitch("IconTonal", showIconTonal) { showIconTonal = it }
+                        LabeledSwitch("IconOutlined", showIconOutlined) { showIconOutlined = it }
                     }
                     Row(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
                         Text("圆角")
@@ -133,6 +156,41 @@ fun ColorSchemeGallery(onEditClick: (() -> Unit)? = null) {
                         Text("轮廓")
                         Slider(value = outline, onValueChange = { outline = it }, valueRange = 0f..4f, modifier = Modifier.weight(1f))
                         Text(outline.roundToInt().toString())
+                    }
+                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
+                        Text("图标角半径(Outlined)")
+                        Slider(value = iconOutlinedRadius, onValueChange = { iconOutlinedRadius = it }, valueRange = 0f..32f, modifier = Modifier.weight(1f))
+                        Text(iconOutlinedRadius.roundToInt().toString())
+                    }
+                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
+                        Text("图标边框")
+                        Slider(value = iconOutline, onValueChange = { iconOutline = it }, valueRange = 0f..4f, modifier = Modifier.weight(1f))
+                        Text(iconOutline.roundToInt().toString())
+                        Text("图标大小")
+                        Slider(value = iconSize, onValueChange = { iconSize = it }, valueRange = 12f..48f, modifier = Modifier.weight(1f))
+                        Text(iconSize.roundToInt().toString())
+                        Text("内边距")
+                        Slider(value = iconPadding, onValueChange = { iconPadding = it }, valueRange = 0f..24f, modifier = Modifier.weight(1f))
+                        Text(iconPadding.roundToInt().toString())
+                    }
+                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
+                        Text("图标类型")
+                        RadioButton(selected = iconType == 0, onClick = { iconType = 0 })
+                        Text("Star")
+                        RadioButton(selected = iconType == 1, onClick = { iconType = 1 })
+                        Text("Add")
+                        RadioButton(selected = iconType == 2, onClick = { iconType = 2 })
+                        Text("Favorite")
+                    }
+                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
+                        RadioButton(selected = iconType == 3, onClick = { iconType = 3 })
+                        Text("Search")
+                        RadioButton(selected = iconType == 4, onClick = { iconType = 4 })
+                        Text("Settings")
+                        RadioButton(selected = iconType == 5, onClick = { iconType = 5 })
+                        Text("Share")
+                        RadioButton(selected = iconType == 6, onClick = { iconType = 6 })
+                        Text("Close")
                     }
                     Row(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
                         Text("海拔")
@@ -160,24 +218,158 @@ fun ColorSchemeGallery(onEditClick: (() -> Unit)? = null) {
                         1 -> colors.onSecondaryContainer
                         else -> colors.onTertiaryContainer
                     }
+                    val iconVector = when (iconType) {
+                        0 -> Icons.Filled.Star
+                        1 -> Icons.Filled.Add
+                        2 -> Icons.Filled.Favorite
+                        3 -> Icons.Filled.Search
+                        4 -> Icons.Filled.Settings
+                        5 -> Icons.Filled.Share
+                        else -> Icons.Filled.Close
+                    }
                     val shape = RoundedCornerShape(radius.roundToInt().dp)
                     val elevDp = listOf(0.dp, 2.dp, 6.dp, 8.dp)[elevIndex]
                     Row(horizontalArrangement = Arrangement.spacedBy(12.dp), verticalAlignment = Alignment.CenterVertically) {
                         if (showFilled) Button(onClick = {}, enabled = enabled, shape = shape, colors = ButtonDefaults.buttonColors(containerColor = accent, contentColor = onAccent), elevation = ButtonDefaults.buttonElevation(defaultElevation = elevDp)) { Text("Filled") }
                         if (showTonal) FilledTonalButton(onClick = {}, enabled = enabled, shape = shape, colors = ButtonDefaults.filledTonalButtonColors(containerColor = accentContainer, contentColor = onAccentContainer), elevation = ButtonDefaults.buttonElevation(defaultElevation = elevDp)) { Text("Tonal") }
-                        if (showOutlined) OutlinedButton(onClick = {}, enabled = enabled, shape = shape, border = BorderStroke(outline.dp, accent), colors = ButtonDefaults.outlinedButtonColors(contentColor = accent)) { Text("Outlined") }
-                        if (showText) TextButton(onClick = {}, enabled = enabled, shape = shape, colors = ButtonDefaults.textButtonColors(contentColor = accent)) { Text("Text") }
-                        if (showIcon) {
-                            if (iconContainer) {
-                                Surface(color = accentContainer, shape = shape) {
-                                    IconButton(onClick = {}, enabled = enabled) { Text("☆", color = onAccentContainer) }
-                                }
-                            } else {
-                                IconButton(onClick = {}, enabled = enabled) { Text("☆", color = accent) }
-                            }
-                        }
+                        if (showOutlined) OutlinedButton(onClick = {}, enabled = enabled, shape = shape, border = BorderStroke(outline.dp, accent), colors = ButtonDefaults.outlinedButtonColors(contentColor = accent), elevation = ButtonDefaults.buttonElevation(defaultElevation = elevDp)) { Text("Outlined") }
+                        if (showText) TextButton(onClick = {}, enabled = enabled, shape = shape, colors = ButtonDefaults.textButtonColors(contentColor = accent), elevation = ButtonDefaults.buttonElevation(defaultElevation = elevDp)) { Text("Text") }
+                        if (showIconPlain) IconButton(onClick = {}, enabled = enabled, colors = IconButtonDefaults.iconButtonColors(contentColor = accent)) { Icon(iconVector, contentDescription = null, modifier = Modifier.padding(iconPadding.dp).size(iconSize.dp)) }
+                        if (showIconFilled) FilledIconButton(onClick = {}, enabled = enabled, colors = IconButtonDefaults.filledIconButtonColors(containerColor = accentContainer, contentColor = onAccentContainer)) { Icon(iconVector, contentDescription = null, modifier = Modifier.padding(iconPadding.dp).size(iconSize.dp)) }
+                        if (showIconTonal) FilledTonalIconButton(onClick = {}, enabled = enabled, colors = IconButtonDefaults.filledTonalIconButtonColors(containerColor = accentContainer, contentColor = onAccentContainer)) { Icon(iconVector, contentDescription = null, modifier = Modifier.padding(iconPadding.dp).size(iconSize.dp)) }
+                        if (showIconOutlined) OutlinedIconButton(onClick = {}, enabled = enabled, colors = IconButtonDefaults.outlinedIconButtonColors(contentColor = accent), border = BorderStroke(iconOutline.dp, accent), shape = RoundedCornerShape(iconOutlinedRadius.roundToInt().dp)) { Icon(iconVector, contentDescription = null, modifier = Modifier.padding(iconPadding.dp).size(iconSize.dp)) }
                         Token(accent, onAccent, "accent")
                         Token(accentContainer, onAccentContainer, "accentContainer")
+                    }
+                }
+            }
+
+            Section(
+                title = "交互态与状态层",
+                desc = listOf(
+                    "Pressed/Focused/Hovered 的状态层颜色对比。",
+                )
+            ) {
+                var enabled by remember { mutableStateOf(true) }
+                var source by remember { mutableStateOf(0) }
+                var showFilled by remember { mutableStateOf(true) }
+                var showTonal by remember { mutableStateOf(true) }
+                var showOutlined by remember { mutableStateOf(true) }
+                var showText by remember { mutableStateOf(true) }
+                var showIconPlain by remember { mutableStateOf(false) }
+                var showIconFilled by remember { mutableStateOf(false) }
+                var showIconTonal by remember { mutableStateOf(false) }
+                var showIconOutlined by remember { mutableStateOf(false) }
+                var pressed by remember { mutableStateOf(false) }
+                var focused by remember { mutableStateOf(false) }
+                var hovered by remember { mutableStateOf(false) }
+                val isrc = remember { MutableInteractionSource() }
+                var pressRef by remember { mutableStateOf<PressInteraction.Press?>(null) }
+                var focusRef by remember { mutableStateOf<FocusInteraction.Focus?>(null) }
+                var hoverRef by remember { mutableStateOf<HoverInteraction.Enter?>(null) }
+                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    Row(horizontalArrangement = Arrangement.spacedBy(12.dp), verticalAlignment = Alignment.CenterVertically) {
+                        LabeledSwitch("启用", enabled) { enabled = it }
+                        Row(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
+                            RadioButton(selected = source == 0, onClick = { source = 0 })
+                            Text("Primary")
+                            RadioButton(selected = source == 1, onClick = { source = 1 })
+                            Text("Secondary")
+                            RadioButton(selected = source == 2, onClick = { source = 2 })
+                            Text("Tertiary")
+                        }
+                    }
+                    Row(horizontalArrangement = Arrangement.spacedBy(12.dp), verticalAlignment = Alignment.CenterVertically) {
+                        LabeledSwitch("Filled", showFilled) { showFilled = it }
+                        LabeledSwitch("Tonal", showTonal) { showTonal = it }
+                        LabeledSwitch("Outlined", showOutlined) { showOutlined = it }
+                        LabeledSwitch("Text", showText) { showText = it }
+                    }
+                    Row(horizontalArrangement = Arrangement.spacedBy(12.dp), verticalAlignment = Alignment.CenterVertically) {
+                        LabeledSwitch("Icon", showIconPlain) { showIconPlain = it }
+                        LabeledSwitch("IconFilled", showIconFilled) { showIconFilled = it }
+                        LabeledSwitch("IconTonal", showIconTonal) { showIconTonal = it }
+                        LabeledSwitch("IconOutlined", showIconOutlined) { showIconOutlined = it }
+                    }
+                    Row(horizontalArrangement = Arrangement.spacedBy(12.dp), verticalAlignment = Alignment.CenterVertically) {
+                        LabeledSwitch("Pressed", pressed) {
+                            pressed = it
+                            if (it) {
+                                val p = PressInteraction.Press(Offset.Zero)
+                                pressRef = p
+                                isrc.tryEmit(p)
+                            } else {
+                                pressRef?.let { pr -> isrc.tryEmit(PressInteraction.Release(pr)) }
+                                pressRef = null
+                            }
+                        }
+                        LabeledSwitch("Focused", focused) {
+                            focused = it
+                            if (it) {
+                                val f = FocusInteraction.Focus()
+                                focusRef = f
+                                isrc.tryEmit(f)
+                            } else {
+                                focusRef?.let { fr -> isrc.tryEmit(FocusInteraction.Unfocus(fr)) }
+                                focusRef = null
+                            }
+                        }
+                        LabeledSwitch("Hovered", hovered) {
+                            hovered = it
+                            if (it) {
+                                val h = HoverInteraction.Enter()
+                                hoverRef = h
+                                isrc.tryEmit(h)
+                            } else {
+                                hoverRef?.let { hr -> isrc.tryEmit(HoverInteraction.Exit(hr)) }
+                                hoverRef = null
+                            }
+                        }
+                    }
+                    val accent = when (source) {
+                        0 -> colors.primary
+                        1 -> colors.secondary
+                        else -> colors.tertiary
+                    }
+                    val onAccent = when (source) {
+                        0 -> colors.onPrimary
+                        1 -> colors.onSecondary
+                        else -> colors.onTertiary
+                    }
+                    val accentContainer = when (source) {
+                        0 -> colors.primaryContainer
+                        1 -> colors.secondaryContainer
+                        else -> colors.tertiaryContainer
+                    }
+                    val onAccentContainer = when (source) {
+                        0 -> colors.onPrimaryContainer
+                        1 -> colors.onSecondaryContainer
+                        else -> colors.onTertiaryContainer
+                    }
+                    Row(horizontalArrangement = Arrangement.spacedBy(12.dp), verticalAlignment = Alignment.CenterVertically) {
+                        if (showFilled) Button(onClick = {}, enabled = enabled, interactionSource = isrc, colors = ButtonDefaults.buttonColors(containerColor = accent, contentColor = onAccent)) { Text("Filled") }
+                        if (showTonal) FilledTonalButton(onClick = {}, enabled = enabled, interactionSource = isrc, colors = ButtonDefaults.filledTonalButtonColors(containerColor = accentContainer, contentColor = onAccentContainer)) { Text("Tonal") }
+                        if (showOutlined) OutlinedButton(onClick = {}, enabled = enabled, interactionSource = isrc, colors = ButtonDefaults.outlinedButtonColors(contentColor = accent)) { Text("Outlined") }
+                        if (showText) TextButton(onClick = {}, enabled = enabled, interactionSource = isrc, colors = ButtonDefaults.textButtonColors(contentColor = accent)) { Text("Text") }
+                        if (showIconPlain) IconButton(onClick = {}, enabled = enabled, interactionSource = isrc, colors = IconButtonDefaults.iconButtonColors(contentColor = accent)) { Icon(Icons.Filled.Star, contentDescription = null) }
+                        if (showIconFilled) FilledIconButton(onClick = {}, enabled = enabled, interactionSource = isrc, colors = IconButtonDefaults.filledIconButtonColors(containerColor = accentContainer, contentColor = onAccentContainer)) { Icon(Icons.Filled.Star, contentDescription = null) }
+                        if (showIconTonal) FilledTonalIconButton(onClick = {}, enabled = enabled, interactionSource = isrc, colors = IconButtonDefaults.filledTonalIconButtonColors(containerColor = accentContainer, contentColor = onAccentContainer)) { Icon(Icons.Filled.Star, contentDescription = null) }
+                        if (showIconOutlined) OutlinedIconButton(onClick = {}, enabled = enabled, interactionSource = isrc, colors = IconButtonDefaults.outlinedIconButtonColors(contentColor = accent)) { Icon(Icons.Filled.Star, contentDescription = null) }
+                    }
+                    val pressedAlpha = 0.12f
+                    val focusedAlpha = 0.12f
+                    val hoveredAlpha = 0.08f
+                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        Token(overlayStateColor(accent, onAccent, pressedAlpha), onAccent, "accent Pressed")
+                        Token(overlayStateColor(accentContainer, onAccentContainer, pressedAlpha), onAccentContainer, "accentContainer Pressed")
+                    }
+                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        Token(overlayStateColor(accent, onAccent, focusedAlpha), onAccent, "accent Focused")
+                        Token(overlayStateColor(accentContainer, onAccentContainer, focusedAlpha), onAccentContainer, "accentContainer Focused")
+                    }
+                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        Token(overlayStateColor(accent, onAccent, hoveredAlpha), onAccent, "accent Hovered")
+                        Token(overlayStateColor(accentContainer, onAccentContainer, hoveredAlpha), onAccentContainer, "accentContainer Hovered")
                     }
                 }
             }
@@ -1054,6 +1246,20 @@ fun colorToHex(c: Color): String {
     val b = (c.blue * 255).roundToInt().coerceIn(0, 255)
     fun h(n: Int) = n.toString(16).uppercase().padStart(2, '0')
     return "#${h(a)}${h(r)}${h(g)}${h(b)}"
+}
+
+fun overlayStateColor(base: Color, overlay: Color, alpha: Float): Color =
+    blendOver(overlay.copy(alpha = alpha), base)
+
+fun blendOver(top: Color, bottom: Color): Color {
+    val a1 = top.alpha
+    val a2 = bottom.alpha
+    val outA = a1 + a2 * (1f - a1)
+    val denom = if (outA == 0f) 1f else outA
+    val r = (top.red * a1 + bottom.red * a2 * (1f - a1)) / denom
+    val g = (top.green * a1 + bottom.green * a2 * (1f - a1)) / denom
+    val b = (top.blue * a1 + bottom.blue * a2 * (1f - a1)) / denom
+    return Color(r, g, b, outA)
 }
 
 @Composable
