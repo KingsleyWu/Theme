@@ -67,6 +67,9 @@ fun ColorSchemeGallery(onEditClick: (() -> Unit)? = null) {
     var enabledPrimary by remember { mutableStateOf(true) }
     var outlinedEnabled by remember { mutableStateOf(true) }
     var elevatedSurface by remember { mutableStateOf(true) }
+    var iconTypeGlobal by remember { mutableStateOf(0) }
+    var iconSizeGlobal by remember { mutableStateOf(24f) }
+    var iconPaddingGlobal by remember { mutableStateOf(8f) }
     Scaffold(
         topBar = {
             TopAppBar(title = { Text("ColorScheme 示例") }, actions = {
@@ -121,9 +124,6 @@ fun ColorSchemeGallery(onEditClick: (() -> Unit)? = null) {
                 var outline by remember { mutableStateOf(1f) }
                 var iconOutlinedRadius by remember { mutableStateOf(12f) }
                 var iconOutline by remember { mutableStateOf(1f) }
-                var iconSize by remember { mutableStateOf(24f) }
-                var iconPadding by remember { mutableStateOf(8f) }
-                var iconType by remember { mutableStateOf(0) }
                 var elevIndex by remember { mutableStateOf(0) }
                 Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                     LabeledSwitch("启用", enabled) { enabled = it }
@@ -169,29 +169,29 @@ fun ColorSchemeGallery(onEditClick: (() -> Unit)? = null) {
                         Slider(value = iconOutline, onValueChange = { iconOutline = it }, valueRange = 0f..4f, modifier = Modifier.weight(1f))
                         Text(iconOutline.roundToInt().toString())
                         Text("图标大小")
-                        Slider(value = iconSize, onValueChange = { iconSize = it }, valueRange = 12f..48f, modifier = Modifier.weight(1f))
-                        Text(iconSize.roundToInt().toString())
+                        Slider(value = iconSizeGlobal, onValueChange = { iconSizeGlobal = it }, valueRange = 12f..48f, modifier = Modifier.weight(1f))
+                        Text(iconSizeGlobal.roundToInt().toString())
                         Text("内边距")
-                        Slider(value = iconPadding, onValueChange = { iconPadding = it }, valueRange = 0f..24f, modifier = Modifier.weight(1f))
-                        Text(iconPadding.roundToInt().toString())
+                        Slider(value = iconPaddingGlobal, onValueChange = { iconPaddingGlobal = it }, valueRange = 0f..24f, modifier = Modifier.weight(1f))
+                        Text(iconPaddingGlobal.roundToInt().toString())
                     }
                     Row(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
                         Text("图标类型")
-                        RadioButton(selected = iconType == 0, onClick = { iconType = 0 })
+                        RadioButton(selected = iconTypeGlobal == 0, onClick = { iconTypeGlobal = 0 })
                         Text("Star")
-                        RadioButton(selected = iconType == 1, onClick = { iconType = 1 })
+                        RadioButton(selected = iconTypeGlobal == 1, onClick = { iconTypeGlobal = 1 })
                         Text("Add")
-                        RadioButton(selected = iconType == 2, onClick = { iconType = 2 })
+                        RadioButton(selected = iconTypeGlobal == 2, onClick = { iconTypeGlobal = 2 })
                         Text("Favorite")
                     }
                     Row(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
-                        RadioButton(selected = iconType == 3, onClick = { iconType = 3 })
+                        RadioButton(selected = iconTypeGlobal == 3, onClick = { iconTypeGlobal = 3 })
                         Text("Search")
-                        RadioButton(selected = iconType == 4, onClick = { iconType = 4 })
+                        RadioButton(selected = iconTypeGlobal == 4, onClick = { iconTypeGlobal = 4 })
                         Text("Settings")
-                        RadioButton(selected = iconType == 5, onClick = { iconType = 5 })
+                        RadioButton(selected = iconTypeGlobal == 5, onClick = { iconTypeGlobal = 5 })
                         Text("Share")
-                        RadioButton(selected = iconType == 6, onClick = { iconType = 6 })
+                        RadioButton(selected = iconTypeGlobal == 6, onClick = { iconTypeGlobal = 6 })
                         Text("Close")
                     }
                     Row(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
@@ -220,7 +220,7 @@ fun ColorSchemeGallery(onEditClick: (() -> Unit)? = null) {
                         1 -> colors.onSecondaryContainer
                         else -> colors.onTertiaryContainer
                     }
-                    val iconVector = when (iconType) {
+                    val iconVector = when (iconTypeGlobal) {
                         0 -> Icons.Filled.Star
                         1 -> Icons.Filled.Add
                         2 -> Icons.Filled.Favorite
@@ -236,10 +236,10 @@ fun ColorSchemeGallery(onEditClick: (() -> Unit)? = null) {
                         if (showTonal) FilledTonalButton(onClick = {}, enabled = enabled, shape = shape, colors = ButtonDefaults.filledTonalButtonColors(containerColor = accentContainer, contentColor = onAccentContainer), elevation = ButtonDefaults.buttonElevation(defaultElevation = elevDp)) { Text("Tonal") }
                         if (showOutlined) OutlinedButton(onClick = {}, enabled = enabled, shape = shape, border = BorderStroke(outline.dp, accent), colors = ButtonDefaults.outlinedButtonColors(contentColor = accent), elevation = ButtonDefaults.buttonElevation(defaultElevation = elevDp)) { Text("Outlined") }
                         if (showText) TextButton(onClick = {}, enabled = enabled, shape = shape, colors = ButtonDefaults.textButtonColors(contentColor = accent), elevation = ButtonDefaults.buttonElevation(defaultElevation = elevDp)) { Text("Text") }
-                        if (showIconPlain) IconButton(onClick = {}, enabled = enabled, colors = IconButtonDefaults.iconButtonColors(contentColor = accent)) { Icon(iconVector, contentDescription = null, modifier = Modifier.padding(iconPadding.dp).size(iconSize.dp)) }
-                        if (showIconFilled) FilledIconButton(onClick = {}, enabled = enabled, colors = IconButtonDefaults.filledIconButtonColors(containerColor = accentContainer, contentColor = onAccentContainer)) { Icon(iconVector, contentDescription = null, modifier = Modifier.padding(iconPadding.dp).size(iconSize.dp)) }
-                        if (showIconTonal) FilledTonalIconButton(onClick = {}, enabled = enabled, colors = IconButtonDefaults.filledTonalIconButtonColors(containerColor = accentContainer, contentColor = onAccentContainer)) { Icon(iconVector, contentDescription = null, modifier = Modifier.padding(iconPadding.dp).size(iconSize.dp)) }
-                        if (showIconOutlined) OutlinedIconButton(onClick = {}, enabled = enabled, colors = IconButtonDefaults.outlinedIconButtonColors(contentColor = accent), border = BorderStroke(iconOutline.dp, accent), shape = RoundedCornerShape(iconOutlinedRadius.roundToInt().dp)) { Icon(iconVector, contentDescription = null, modifier = Modifier.padding(iconPadding.dp).size(iconSize.dp)) }
+                        if (showIconPlain) IconButton(onClick = {}, enabled = enabled, colors = IconButtonDefaults.iconButtonColors(contentColor = accent)) { Icon(iconVector, contentDescription = null, modifier = Modifier.padding(iconPaddingGlobal.dp).size(iconSizeGlobal.dp)) }
+                        if (showIconFilled) FilledIconButton(onClick = {}, enabled = enabled, colors = IconButtonDefaults.filledIconButtonColors(containerColor = accentContainer, contentColor = onAccentContainer)) { Icon(iconVector, contentDescription = null, modifier = Modifier.padding(iconPaddingGlobal.dp).size(iconSizeGlobal.dp)) }
+                        if (showIconTonal) FilledTonalIconButton(onClick = {}, enabled = enabled, colors = IconButtonDefaults.filledTonalIconButtonColors(containerColor = accentContainer, contentColor = onAccentContainer)) { Icon(iconVector, contentDescription = null, modifier = Modifier.padding(iconPaddingGlobal.dp).size(iconSizeGlobal.dp)) }
+                        if (showIconOutlined) OutlinedIconButton(onClick = {}, enabled = enabled, colors = IconButtonDefaults.outlinedIconButtonColors(contentColor = accent), border = BorderStroke(iconOutline.dp, accent), shape = RoundedCornerShape(iconOutlinedRadius.roundToInt().dp)) { Icon(iconVector, contentDescription = null, modifier = Modifier.padding(iconPaddingGlobal.dp).size(iconSizeGlobal.dp)) }
                         Token(accent, onAccent, "accent")
                         Token(accentContainer, onAccentContainer, "accentContainer")
                     }
@@ -266,8 +266,6 @@ fun ColorSchemeGallery(onEditClick: (() -> Unit)? = null) {
                 var btnOutline by remember { mutableStateOf(1f) }
                 var btnRadius by remember { mutableStateOf(12f) }
                 var iconOutline2 by remember { mutableStateOf(1f) }
-                var iconSize2 by remember { mutableStateOf(24f) }
-                var iconPadding2 by remember { mutableStateOf(8f) }
                 var pressed by remember { mutableStateOf(false) }
                 var focused by remember { mutableStateOf(false) }
                 var hovered by remember { mutableStateOf(false) }
@@ -309,11 +307,11 @@ fun ColorSchemeGallery(onEditClick: (() -> Unit)? = null) {
                     }
                     Row(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
                         Text("图标大小")
-                        Slider(value = iconSize2, onValueChange = { iconSize2 = it }, valueRange = 12f..48f, modifier = Modifier.weight(1f))
-                        Text(iconSize2.toInt().toString())
+                        Slider(value = iconSizeGlobal, onValueChange = { iconSizeGlobal = it }, valueRange = 12f..48f, modifier = Modifier.weight(1f))
+                        Text(iconSizeGlobal.toInt().toString())
                         Text("内边距")
-                        Slider(value = iconPadding2, onValueChange = { iconPadding2 = it }, valueRange = 0f..24f, modifier = Modifier.weight(1f))
-                        Text(iconPadding2.toInt().toString())
+                        Slider(value = iconPaddingGlobal, onValueChange = { iconPaddingGlobal = it }, valueRange = 0f..24f, modifier = Modifier.weight(1f))
+                        Text(iconPaddingGlobal.toInt().toString())
                     }
                     Row(horizontalArrangement = Arrangement.spacedBy(12.dp), verticalAlignment = Alignment.CenterVertically) {
                         LabeledSwitch("Icon", showIconPlain) { showIconPlain = it }
@@ -376,6 +374,15 @@ fun ColorSchemeGallery(onEditClick: (() -> Unit)? = null) {
                         1 -> colors.onSecondaryContainer
                         else -> colors.onTertiaryContainer
                     }
+                    val iconVector = when (iconTypeGlobal) {
+                        0 -> Icons.Filled.Star
+                        1 -> Icons.Filled.Add
+                        2 -> Icons.Filled.Favorite
+                        3 -> Icons.Filled.Search
+                        4 -> Icons.Filled.Settings
+                        5 -> Icons.Filled.Share
+                        else -> Icons.Filled.Close
+                    }
                     val btnShape = RoundedCornerShape(btnRadius.toInt().dp)
                     val btnElevDp = btnElevation.toInt().dp
                     val btnOutlineDp = btnOutline.toInt().dp
@@ -385,10 +392,10 @@ fun ColorSchemeGallery(onEditClick: (() -> Unit)? = null) {
                         if (showTonal) FilledTonalButton(onClick = {}, enabled = enabled, interactionSource = isrc, shape = btnShape, colors = ButtonDefaults.filledTonalButtonColors(containerColor = accentContainer, contentColor = onAccentContainer), elevation = ButtonDefaults.buttonElevation(defaultElevation = btnElevDp)) { Text("Tonal") }
                         if (showOutlined) OutlinedButton(onClick = {}, enabled = enabled, interactionSource = isrc, shape = btnShape, colors = ButtonDefaults.outlinedButtonColors(contentColor = accent), border = BorderStroke(btnOutlineDp, accent), elevation = ButtonDefaults.buttonElevation(defaultElevation = btnElevDp)) { Text("Outlined") }
                         if (showText) TextButton(onClick = {}, enabled = enabled, interactionSource = isrc, shape = btnShape, colors = ButtonDefaults.textButtonColors(contentColor = accent), elevation = ButtonDefaults.buttonElevation(defaultElevation = btnElevDp)) { Text("Text") }
-                        if (showIconPlain) IconButton(onClick = {}, enabled = enabled, interactionSource = isrc, colors = IconButtonDefaults.iconButtonColors(contentColor = accent)) { Icon(Icons.Filled.Star, contentDescription = null, modifier = Modifier.padding(iconPadding2.dp).size(iconSize2.dp)) }
-                        if (showIconFilled) FilledIconButton(onClick = {}, enabled = enabled, interactionSource = isrc, colors = IconButtonDefaults.filledIconButtonColors(containerColor = accentContainer, contentColor = onAccentContainer)) { Icon(Icons.Filled.Star, contentDescription = null, modifier = Modifier.padding(iconPadding2.dp).size(iconSize2.dp)) }
-                        if (showIconTonal) FilledTonalIconButton(onClick = {}, enabled = enabled, interactionSource = isrc, colors = IconButtonDefaults.filledTonalIconButtonColors(containerColor = accentContainer, contentColor = onAccentContainer)) { Icon(Icons.Filled.Star, contentDescription = null, modifier = Modifier.padding(iconPadding2.dp).size(iconSize2.dp)) }
-                        if (showIconOutlined) OutlinedIconButton(onClick = {}, enabled = enabled, interactionSource = isrc, colors = IconButtonDefaults.outlinedIconButtonColors(contentColor = accent), border = BorderStroke(iconOutlineDp, accent), shape = btnShape) { Icon(Icons.Filled.Star, contentDescription = null, modifier = Modifier.padding(iconPadding2.dp).size(iconSize2.dp)) }
+                        if (showIconPlain) IconButton(onClick = {}, enabled = enabled, interactionSource = isrc, colors = IconButtonDefaults.iconButtonColors(contentColor = accent)) { Icon(iconVector, contentDescription = null, modifier = Modifier.padding(iconPaddingGlobal.dp).size(iconSizeGlobal.dp)) }
+                        if (showIconFilled) FilledIconButton(onClick = {}, enabled = enabled, interactionSource = isrc, colors = IconButtonDefaults.filledIconButtonColors(containerColor = accentContainer, contentColor = onAccentContainer)) { Icon(iconVector, contentDescription = null, modifier = Modifier.padding(iconPaddingGlobal.dp).size(iconSizeGlobal.dp)) }
+                        if (showIconTonal) FilledTonalIconButton(onClick = {}, enabled = enabled, interactionSource = isrc, colors = IconButtonDefaults.filledTonalIconButtonColors(containerColor = accentContainer, contentColor = onAccentContainer)) { Icon(iconVector, contentDescription = null, modifier = Modifier.padding(iconPaddingGlobal.dp).size(iconSizeGlobal.dp)) }
+                        if (showIconOutlined) OutlinedIconButton(onClick = {}, enabled = enabled, interactionSource = isrc, colors = IconButtonDefaults.outlinedIconButtonColors(contentColor = accent), border = BorderStroke(iconOutlineDp, accent), shape = btnShape) { Icon(iconVector, contentDescription = null, modifier = Modifier.padding(iconPaddingGlobal.dp).size(iconSizeGlobal.dp)) }
                     }
                     val pressedAlpha = 0.12f
                     val focusedAlpha = 0.12f
@@ -679,8 +686,10 @@ fun ColorSchemeGallery(onEditClick: (() -> Unit)? = null) {
             ) {
                 var enabled by remember { mutableStateOf(true) }
                 var useContainer by remember { mutableStateOf(true) }
-                LabeledSwitch("启用", enabled) { enabled = it }
-                LabeledSwitch("容器变体", useContainer) { useContainer = it }
+                Row(horizontalArrangement = Arrangement.spacedBy(12.dp), verticalAlignment = Alignment.CenterVertically) {
+                    LabeledSwitch("启用", enabled) { enabled = it }
+                    LabeledSwitch("容器变体", useContainer) { useContainer = it }
+                }
                 Row(horizontalArrangement = Arrangement.spacedBy(12.dp), verticalAlignment = Alignment.CenterVertically) {
                     if (useContainer) {
                         FilledTonalButton(onClick = {}, enabled = enabled) { Text("FilledTonal") }
@@ -766,8 +775,10 @@ fun ColorSchemeGallery(onEditClick: (() -> Unit)? = null) {
             ) {
                 var useContainer by remember { mutableStateOf(false) }
                 var enabled by remember { mutableStateOf(true) }
-                LabeledSwitch("启用输入", enabled) { enabled = it }
-                LabeledSwitch("容器变体", useContainer) { useContainer = it }
+                Row(horizontalArrangement = Arrangement.spacedBy(12.dp), verticalAlignment = Alignment.CenterVertically) {
+                    LabeledSwitch("启用输入", enabled) { enabled = it }
+                    LabeledSwitch("容器变体", useContainer) { useContainer = it }
+                }
                 Row(horizontalArrangement = Arrangement.spacedBy(12.dp), verticalAlignment = Alignment.CenterVertically) {
                     val bg = if (useContainer) colors.surfaceContainer else colors.background
                     val fg = if (useContainer) colors.onSurface else colors.onBackground
@@ -1002,9 +1013,11 @@ fun ColorSchemeGallery(onEditClick: (() -> Unit)? = null) {
             ) {
                 var enabled by remember { mutableStateOf(true) }
                 var useContainer by remember { mutableStateOf(false) }
-                LabeledSwitch("启用", enabled) { enabled = it }
                 Row(horizontalArrangement = Arrangement.spacedBy(12.dp), verticalAlignment = Alignment.CenterVertically) {
+                    LabeledSwitch("启用", enabled) { enabled = it }
                     LabeledSwitch("容器变体", useContainer) { useContainer = it }
+                }
+                Row(horizontalArrangement = Arrangement.spacedBy(12.dp), verticalAlignment = Alignment.CenterVertically) {
                     Button(onClick = {}, enabled = enabled) { Text("正常") }
                     Button(
                         onClick = {},
@@ -1026,8 +1039,8 @@ fun ColorSchemeGallery(onEditClick: (() -> Unit)? = null) {
             ) {
                 var determinate by remember { mutableStateOf(false) }
                 var progress by remember { mutableStateOf(0.4f) }
+                LabeledSwitch("确定", determinate) { determinate = it }
                 Row(horizontalArrangement = Arrangement.spacedBy(12.dp), verticalAlignment = Alignment.CenterVertically) {
-                    LabeledSwitch("确定", determinate) { determinate = it }
                     if (determinate) {
                         LinearProgressIndicator(progress = { progress }, modifier = Modifier.size(160.dp, 6.dp))
                         Slider(value = progress, onValueChange = { progress = it }, valueRange = 0f..1f)
@@ -1044,9 +1057,11 @@ fun ColorSchemeGallery(onEditClick: (() -> Unit)? = null) {
                 )
             ) {
                 var enabledSel by remember { mutableStateOf(true) }
-                LabeledSwitch("启用", enabledSel) { enabledSel = it }
                 Row(horizontalArrangement = Arrangement.spacedBy(12.dp), verticalAlignment = Alignment.CenterVertically) {
+                    LabeledSwitch("启用", enabledSel) { enabledSel = it }
                     LabeledSwitch("选中", checked) { checked = it }
+                }
+                Row(horizontalArrangement = Arrangement.spacedBy(12.dp), verticalAlignment = Alignment.CenterVertically) {
                     Switch(checked = checked, onCheckedChange = { checked = it }, enabled = enabledSel)
                     Checkbox(checked = checked, onCheckedChange = { checked = it }, enabled = enabledSel)
                     RadioButton(selected = checked, onClick = { checked = !checked }, enabled = enabledSel)
