@@ -2,6 +2,7 @@ package com.just.theme
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.background
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -95,6 +96,14 @@ fun ColorSchemeGallery(onEditClick: (() -> Unit)? = null) {
             ) {
                 var enabled by remember { mutableStateOf(true) }
                 var source by remember { mutableStateOf(0) }
+                var showFilled by remember { mutableStateOf(true) }
+                var showTonal by remember { mutableStateOf(true) }
+                var showOutlined by remember { mutableStateOf(true) }
+                var showText by remember { mutableStateOf(true) }
+                var showIcon by remember { mutableStateOf(false) }
+                var radius by remember { mutableStateOf(12f) }
+                var outline by remember { mutableStateOf(1f) }
+                var elevated by remember { mutableStateOf(false) }
                 Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                     Row(horizontalArrangement = Arrangement.spacedBy(12.dp), verticalAlignment = Alignment.CenterVertically) {
                         LabeledSwitch("启用", enabled) { enabled = it }
@@ -106,6 +115,24 @@ fun ColorSchemeGallery(onEditClick: (() -> Unit)? = null) {
                             RadioButton(selected = source == 2, onClick = { source = 2 })
                             Text("Tertiary")
                         }
+                    }
+                    Row(horizontalArrangement = Arrangement.spacedBy(12.dp), verticalAlignment = Alignment.CenterVertically) {
+                        LabeledSwitch("Filled", showFilled) { showFilled = it }
+                        LabeledSwitch("Tonal", showTonal) { showTonal = it }
+                        LabeledSwitch("Outlined", showOutlined) { showOutlined = it }
+                        LabeledSwitch("Text", showText) { showText = it }
+                        LabeledSwitch("Icon", showIcon) { showIcon = it }
+                        LabeledSwitch("海拔", elevated) { elevated = it }
+                    }
+                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
+                        Text("圆角")
+                        Slider(value = radius, onValueChange = { radius = it }, valueRange = 0f..32f, modifier = Modifier.weight(1f))
+                        Text(radius.toString())
+                    }
+                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
+                        Text("轮廓")
+                        Slider(value = outline, onValueChange = { outline = it }, valueRange = 0f..4f, modifier = Modifier.weight(1f))
+                        Text(outline.toString())
                     }
                     val accent = when (source) {
                         0 -> colors.primary
@@ -127,11 +154,19 @@ fun ColorSchemeGallery(onEditClick: (() -> Unit)? = null) {
                         1 -> colors.onSecondaryContainer
                         else -> colors.onTertiaryContainer
                     }
+                    val shape = RoundedCornerShape(radius.roundToInt().dp)
                     Row(horizontalArrangement = Arrangement.spacedBy(12.dp), verticalAlignment = Alignment.CenterVertically) {
-                        Button(onClick = {}, enabled = enabled, colors = ButtonDefaults.buttonColors(containerColor = accent, contentColor = onAccent)) { Text("Filled") }
-                        FilledTonalButton(onClick = {}, enabled = enabled, colors = ButtonDefaults.filledTonalButtonColors(containerColor = accentContainer, contentColor = onAccentContainer)) { Text("Tonal") }
-                        OutlinedButton(onClick = {}, enabled = enabled, colors = ButtonDefaults.outlinedButtonColors(contentColor = accent)) { Text("Outlined") }
-                        TextButton(onClick = {}, enabled = enabled, colors = ButtonDefaults.textButtonColors(contentColor = accent)) { Text("Text") }
+                        if (showFilled) {
+                            if (elevated) {
+                                ElevatedButton(onClick = {}, enabled = enabled, shape = shape) { Text("Filled") }
+                            } else {
+                                Button(onClick = {}, enabled = enabled, shape = shape, colors = ButtonDefaults.buttonColors(containerColor = accent, contentColor = onAccent)) { Text("Filled") }
+                            }
+                        }
+                        if (showTonal) FilledTonalButton(onClick = {}, enabled = enabled, shape = shape, colors = ButtonDefaults.filledTonalButtonColors(containerColor = accentContainer, contentColor = onAccentContainer)) { Text("Tonal") }
+                        if (showOutlined) OutlinedButton(onClick = {}, enabled = enabled, shape = shape, border = BorderStroke(outline.dp, accent), colors = ButtonDefaults.outlinedButtonColors(contentColor = accent)) { Text("Outlined") }
+                        if (showText) TextButton(onClick = {}, enabled = enabled, shape = shape, colors = ButtonDefaults.textButtonColors(contentColor = accent)) { Text("Text") }
+                        if (showIcon) IconButton(onClick = {}, enabled = enabled) { Text("☆", color = accent) }
                         Token(accent, onAccent, "accent")
                         Token(accentContainer, onAccentContainer, "accentContainer")
                     }
@@ -289,6 +324,9 @@ fun ColorSchemeGallery(onEditClick: (() -> Unit)? = null) {
                 var trailing by remember { mutableStateOf(false) }
                 var showDisabledError by remember { mutableStateOf(false) }
                 var source by remember { mutableStateOf(0) }
+                var disabledPlaceholderVisible by remember { mutableStateOf(true) }
+                var showFilledField by remember { mutableStateOf(true) }
+                var showOutlinedField by remember { mutableStateOf(true) }
                 val max = 20
                 val accent = when (source) { 0 -> colors.primary; 1 -> colors.secondary; else -> colors.tertiary }
                 Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -309,40 +347,71 @@ fun ColorSchemeGallery(onEditClick: (() -> Unit)? = null) {
                         RadioButton(selected = source == 2, onClick = { source = 2 })
                         Text("Tertiary")
                         LabeledSwitch("禁用错误对比", showDisabledError) { showDisabledError = it }
+                        LabeledSwitch("禁用占位可见", disabledPlaceholderVisible) { disabledPlaceholderVisible = it }
+                        LabeledSwitch("填充型", showFilledField) { showFilledField = it }
+                        LabeledSwitch("Outlined", showOutlinedField) { showOutlinedField = it }
                     }
                     Row(horizontalArrangement = Arrangement.spacedBy(16.dp), verticalAlignment = Alignment.CenterVertically) {
-                        OutlinedTextField(
-                            value = textValue,
-                            onValueChange = { if (it.length <= max) textValue = it },
-                            label = { Text("输入") },
-                            isError = isError,
-                            enabled = enabled,
-                            placeholder = { if (showPlaceholder) Text("Placeholder") },
-                            supportingText = {
-                                val parts = mutableListOf<@Composable () -> Unit>()
-                                if (showHelp) parts.add({ Text("辅助信息示例") })
-                                if (showCounter) parts.add({ Text("${textValue.length}/$max") })
-                                if (parts.isNotEmpty()) Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) { parts.forEach { it() } }
-                            },
-                            leadingIcon = { if (leading) Text("@") },
-                            trailingIcon = { if (trailing) Text("#") },
-                            colors = TextFieldDefaults.colors(
-                                focusedIndicatorColor = accent,
-                                cursorColor = accent,
-                                focusedLabelColor = accent,
-                                errorIndicatorColor = colors.error,
-                                errorCursorColor = colors.error,
-                                errorLabelColor = colors.error,
+                        if (showOutlinedField) {
+                            OutlinedTextField(
+                                value = textValue,
+                                onValueChange = { if (it.length <= max) textValue = it },
+                                label = { Text("Outlined") },
+                                isError = isError,
+                                enabled = enabled,
+                                placeholder = { if (showPlaceholder && (enabled || disabledPlaceholderVisible)) Text("Placeholder") },
+                                supportingText = {
+                                    val parts = mutableListOf<@Composable () -> Unit>()
+                                    if (showHelp) parts.add({ Text("辅助信息示例") })
+                                    if (showCounter) parts.add({ Text("${textValue.length}/$max") })
+                                    if (parts.isNotEmpty()) Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) { parts.forEach { it() } }
+                                },
+                                leadingIcon = { if (leading) Text("@") },
+                                trailingIcon = { if (trailing) Text("#") },
+                                colors = TextFieldDefaults.colors(
+                                    focusedIndicatorColor = accent,
+                                    cursorColor = accent,
+                                    focusedLabelColor = accent,
+                                    errorIndicatorColor = colors.error,
+                                    errorCursorColor = colors.error,
+                                    errorLabelColor = colors.error,
+                                )
                             )
-                        )
-                        if (showDisabledError) {
+                        }
+                        if (showFilledField) {
+                            TextField(
+                                value = textValue,
+                                onValueChange = { if (it.length <= max) textValue = it },
+                                label = { Text("Filled") },
+                                isError = isError,
+                                enabled = enabled,
+                                placeholder = { if (showPlaceholder && (enabled || disabledPlaceholderVisible)) Text("Placeholder") },
+                                supportingText = {
+                                    val parts = mutableListOf<@Composable () -> Unit>()
+                                    if (showHelp) parts.add({ Text("辅助信息示例") })
+                                    if (showCounter) parts.add({ Text("${textValue.length}/$max") })
+                                    if (parts.isNotEmpty()) Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) { parts.forEach { it() } }
+                                },
+                                leadingIcon = { if (leading) Text("@") },
+                                trailingIcon = { if (trailing) Text("#") },
+                                colors = TextFieldDefaults.colors(
+                                    focusedIndicatorColor = accent,
+                                    cursorColor = accent,
+                                    focusedLabelColor = accent,
+                                    errorIndicatorColor = colors.error,
+                                    errorCursorColor = colors.error,
+                                    errorLabelColor = colors.error,
+                                )
+                            )
+                        }
+                        if (showDisabledError && showOutlinedField) {
                             OutlinedTextField(
                                 value = textValue,
                                 onValueChange = {},
                                 label = { Text("禁用+错误") },
                                 isError = true,
                                 enabled = false,
-                                placeholder = { if (showPlaceholder) Text("Placeholder") },
+                                placeholder = { if (showPlaceholder && disabledPlaceholderVisible) Text("Placeholder") },
                                 supportingText = { if (showHelp) Text("辅助信息示例") },
                                 leadingIcon = { if (leading) Text("@") },
                                 trailingIcon = { if (trailing) Text("#") },
@@ -355,6 +424,69 @@ fun ColorSchemeGallery(onEditClick: (() -> Unit)? = null) {
                                     errorLabelColor = colors.error,
                                 )
                             )
+                        }
+                        if (showDisabledError && showFilledField) {
+                            TextField(
+                                value = textValue,
+                                onValueChange = {},
+                                label = { Text("禁用+错误") },
+                                isError = true,
+                                enabled = false,
+                                placeholder = { if (showPlaceholder && disabledPlaceholderVisible) Text("Placeholder") },
+                                supportingText = { if (showHelp) Text("辅助信息示例") },
+                                leadingIcon = { if (leading) Text("@") },
+                                trailingIcon = { if (trailing) Text("#") },
+                                colors = TextFieldDefaults.colors(
+                                    focusedIndicatorColor = accent,
+                                    cursorColor = accent,
+                                    focusedLabelColor = accent,
+                                    errorIndicatorColor = colors.error,
+                                    errorCursorColor = colors.error,
+                                    errorLabelColor = colors.error,
+                                )
+                            )
+                        }
+                    }
+                    Row(horizontalArrangement = Arrangement.spacedBy(16.dp), verticalAlignment = Alignment.CenterVertically) {
+                        Surface(color = colors.surfaceContainerLow, shape = RoundedCornerShape(12.dp)) {
+                            Box(modifier = Modifier.padding(12.dp)) {
+                                OutlinedTextField(
+                                    value = textValue,
+                                    onValueChange = { if (it.length <= max) textValue = it },
+                                    label = { Text("Low 容器") },
+                                    enabled = enabled,
+                                    isError = isError,
+                                    placeholder = { if (showPlaceholder && (enabled || disabledPlaceholderVisible)) Text("Placeholder") },
+                                    colors = TextFieldDefaults.colors(
+                                        focusedIndicatorColor = accent,
+                                        cursorColor = accent,
+                                        focusedLabelColor = accent,
+                                        errorIndicatorColor = colors.error,
+                                        errorCursorColor = colors.error,
+                                        errorLabelColor = colors.error,
+                                    )
+                                )
+                            }
+                        }
+                        Surface(color = colors.surfaceContainerHigh, shape = RoundedCornerShape(12.dp)) {
+                            Box(modifier = Modifier.padding(12.dp)) {
+                                OutlinedTextField(
+                                    value = textValue,
+                                    onValueChange = { if (it.length <= max) textValue = it },
+                                    label = { Text("High 容器") },
+                                    enabled = enabled,
+                                    isError = isError,
+                                    placeholder = { if (showPlaceholder && (enabled || disabledPlaceholderVisible)) Text("Placeholder") },
+                                    colors = TextFieldDefaults.colors(
+                                        focusedIndicatorColor = accent,
+                                        cursorColor = accent,
+                                        focusedLabelColor = accent,
+                                        errorIndicatorColor = colors.error,
+                                        errorCursorColor = colors.error,
+                                        errorLabelColor = colors.error,
+                                    )
+                                )
+                            }
                         }
                     }
                 }
