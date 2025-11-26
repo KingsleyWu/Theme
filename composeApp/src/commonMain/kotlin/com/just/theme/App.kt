@@ -6,6 +6,8 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.shape.CutCornerShape
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
 import androidx.compose.material.icons.Icons
@@ -90,8 +92,8 @@ fun ColorSchemeGallery(onEditClick: (() -> Unit)? = null) {
                     "inversePrimary：反色环境下的强调动作色（例如 Snackbar 的 action）。",
                 )
             ) {
+                LabeledSwitch("启用", enabledPrimary) { enabledPrimary = it }
                 Row(horizontalArrangement = Arrangement.spacedBy(12.dp), verticalAlignment = Alignment.CenterVertically) {
-                    LabeledSwitch("启用", enabledPrimary) { enabledPrimary = it }
                     Button(onClick = {}, enabled = enabledPrimary) { Text("Button") }
                     TextButton(onClick = {}, enabled = enabledPrimary) { Text("TextButton") }
                     Token(colors.primary, colors.onPrimary, "primary/onPrimary")
@@ -124,8 +126,8 @@ fun ColorSchemeGallery(onEditClick: (() -> Unit)? = null) {
                 var iconType by remember { mutableStateOf(0) }
                 var elevIndex by remember { mutableStateOf(0) }
                 Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    LabeledSwitch("启用", enabled) { enabled = it }
                     Row(horizontalArrangement = Arrangement.spacedBy(12.dp), verticalAlignment = Alignment.CenterVertically) {
-                        LabeledSwitch("启用", enabled) { enabled = it }
                         Row(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
                             RadioButton(selected = source == 0, onClick = { source = 0 })
                             Text("Primary")
@@ -260,6 +262,12 @@ fun ColorSchemeGallery(onEditClick: (() -> Unit)? = null) {
                 var showIconFilled by remember { mutableStateOf(false) }
                 var showIconTonal by remember { mutableStateOf(false) }
                 var showIconOutlined by remember { mutableStateOf(false) }
+                var btnElevation by remember { mutableStateOf(0f) }
+                var btnOutline by remember { mutableStateOf(1f) }
+                var btnRadius by remember { mutableStateOf(12f) }
+                var iconOutline2 by remember { mutableStateOf(1f) }
+                var iconSize2 by remember { mutableStateOf(24f) }
+                var iconPadding2 by remember { mutableStateOf(8f) }
                 var pressed by remember { mutableStateOf(false) }
                 var focused by remember { mutableStateOf(false) }
                 var hovered by remember { mutableStateOf(false) }
@@ -268,8 +276,8 @@ fun ColorSchemeGallery(onEditClick: (() -> Unit)? = null) {
                 var focusRef by remember { mutableStateOf<FocusInteraction.Focus?>(null) }
                 var hoverRef by remember { mutableStateOf<HoverInteraction.Enter?>(null) }
                 Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    LabeledSwitch("启用", enabled) { enabled = it }
                     Row(horizontalArrangement = Arrangement.spacedBy(12.dp), verticalAlignment = Alignment.CenterVertically) {
-                        LabeledSwitch("启用", enabled) { enabled = it }
                         Row(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
                             RadioButton(selected = source == 0, onClick = { source = 0 })
                             Text("Primary")
@@ -284,6 +292,28 @@ fun ColorSchemeGallery(onEditClick: (() -> Unit)? = null) {
                         LabeledSwitch("Tonal", showTonal) { showTonal = it }
                         LabeledSwitch("Outlined", showOutlined) { showOutlined = it }
                         LabeledSwitch("Text", showText) { showText = it }
+                    }
+                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
+                        Text("按钮海拔")
+                        Slider(value = btnElevation, onValueChange = { btnElevation = it }, valueRange = 0f..16f, modifier = Modifier.weight(1f))
+                        Text("${btnElevation.toInt()}dp")
+                        Text("按钮圆角")
+                        Slider(value = btnRadius, onValueChange = { btnRadius = it }, valueRange = 0f..32f, modifier = Modifier.weight(1f))
+                        Text(btnRadius.toInt().toString())
+                        Text("按钮描边")
+                        Slider(value = btnOutline, onValueChange = { btnOutline = it }, valueRange = 0f..8f, modifier = Modifier.weight(1f))
+                        Text(btnOutline.toInt().toString())
+                        Text("图标描边")
+                        Slider(value = iconOutline2, onValueChange = { iconOutline2 = it }, valueRange = 0f..8f, modifier = Modifier.weight(1f))
+                        Text(iconOutline2.toInt().toString())
+                    }
+                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
+                        Text("图标大小")
+                        Slider(value = iconSize2, onValueChange = { iconSize2 = it }, valueRange = 12f..48f, modifier = Modifier.weight(1f))
+                        Text(iconSize2.toInt().toString())
+                        Text("内边距")
+                        Slider(value = iconPadding2, onValueChange = { iconPadding2 = it }, valueRange = 0f..24f, modifier = Modifier.weight(1f))
+                        Text(iconPadding2.toInt().toString())
                     }
                     Row(horizontalArrangement = Arrangement.spacedBy(12.dp), verticalAlignment = Alignment.CenterVertically) {
                         LabeledSwitch("Icon", showIconPlain) { showIconPlain = it }
@@ -346,15 +376,19 @@ fun ColorSchemeGallery(onEditClick: (() -> Unit)? = null) {
                         1 -> colors.onSecondaryContainer
                         else -> colors.onTertiaryContainer
                     }
+                    val btnShape = RoundedCornerShape(btnRadius.toInt().dp)
+                    val btnElevDp = btnElevation.toInt().dp
+                    val btnOutlineDp = btnOutline.toInt().dp
+                    val iconOutlineDp = iconOutline2.toInt().dp
                     Row(horizontalArrangement = Arrangement.spacedBy(12.dp), verticalAlignment = Alignment.CenterVertically) {
-                        if (showFilled) Button(onClick = {}, enabled = enabled, interactionSource = isrc, colors = ButtonDefaults.buttonColors(containerColor = accent, contentColor = onAccent)) { Text("Filled") }
-                        if (showTonal) FilledTonalButton(onClick = {}, enabled = enabled, interactionSource = isrc, colors = ButtonDefaults.filledTonalButtonColors(containerColor = accentContainer, contentColor = onAccentContainer)) { Text("Tonal") }
-                        if (showOutlined) OutlinedButton(onClick = {}, enabled = enabled, interactionSource = isrc, colors = ButtonDefaults.outlinedButtonColors(contentColor = accent)) { Text("Outlined") }
-                        if (showText) TextButton(onClick = {}, enabled = enabled, interactionSource = isrc, colors = ButtonDefaults.textButtonColors(contentColor = accent)) { Text("Text") }
-                        if (showIconPlain) IconButton(onClick = {}, enabled = enabled, interactionSource = isrc, colors = IconButtonDefaults.iconButtonColors(contentColor = accent)) { Icon(Icons.Filled.Star, contentDescription = null) }
-                        if (showIconFilled) FilledIconButton(onClick = {}, enabled = enabled, interactionSource = isrc, colors = IconButtonDefaults.filledIconButtonColors(containerColor = accentContainer, contentColor = onAccentContainer)) { Icon(Icons.Filled.Star, contentDescription = null) }
-                        if (showIconTonal) FilledTonalIconButton(onClick = {}, enabled = enabled, interactionSource = isrc, colors = IconButtonDefaults.filledTonalIconButtonColors(containerColor = accentContainer, contentColor = onAccentContainer)) { Icon(Icons.Filled.Star, contentDescription = null) }
-                        if (showIconOutlined) OutlinedIconButton(onClick = {}, enabled = enabled, interactionSource = isrc, colors = IconButtonDefaults.outlinedIconButtonColors(contentColor = accent)) { Icon(Icons.Filled.Star, contentDescription = null) }
+                        if (showFilled) Button(onClick = {}, enabled = enabled, interactionSource = isrc, shape = btnShape, colors = ButtonDefaults.buttonColors(containerColor = accent, contentColor = onAccent), elevation = ButtonDefaults.buttonElevation(defaultElevation = btnElevDp)) { Text("Filled") }
+                        if (showTonal) FilledTonalButton(onClick = {}, enabled = enabled, interactionSource = isrc, shape = btnShape, colors = ButtonDefaults.filledTonalButtonColors(containerColor = accentContainer, contentColor = onAccentContainer), elevation = ButtonDefaults.buttonElevation(defaultElevation = btnElevDp)) { Text("Tonal") }
+                        if (showOutlined) OutlinedButton(onClick = {}, enabled = enabled, interactionSource = isrc, shape = btnShape, colors = ButtonDefaults.outlinedButtonColors(contentColor = accent), border = BorderStroke(btnOutlineDp, accent), elevation = ButtonDefaults.buttonElevation(defaultElevation = btnElevDp)) { Text("Outlined") }
+                        if (showText) TextButton(onClick = {}, enabled = enabled, interactionSource = isrc, shape = btnShape, colors = ButtonDefaults.textButtonColors(contentColor = accent), elevation = ButtonDefaults.buttonElevation(defaultElevation = btnElevDp)) { Text("Text") }
+                        if (showIconPlain) IconButton(onClick = {}, enabled = enabled, interactionSource = isrc, colors = IconButtonDefaults.iconButtonColors(contentColor = accent)) { Icon(Icons.Filled.Star, contentDescription = null, modifier = Modifier.padding(iconPadding2.dp).size(iconSize2.dp)) }
+                        if (showIconFilled) FilledIconButton(onClick = {}, enabled = enabled, interactionSource = isrc, colors = IconButtonDefaults.filledIconButtonColors(containerColor = accentContainer, contentColor = onAccentContainer)) { Icon(Icons.Filled.Star, contentDescription = null, modifier = Modifier.padding(iconPadding2.dp).size(iconSize2.dp)) }
+                        if (showIconTonal) FilledTonalIconButton(onClick = {}, enabled = enabled, interactionSource = isrc, colors = IconButtonDefaults.filledTonalIconButtonColors(containerColor = accentContainer, contentColor = onAccentContainer)) { Icon(Icons.Filled.Star, contentDescription = null, modifier = Modifier.padding(iconPadding2.dp).size(iconSize2.dp)) }
+                        if (showIconOutlined) OutlinedIconButton(onClick = {}, enabled = enabled, interactionSource = isrc, colors = IconButtonDefaults.outlinedIconButtonColors(contentColor = accent), border = BorderStroke(iconOutlineDp, accent), shape = btnShape) { Icon(Icons.Filled.Star, contentDescription = null, modifier = Modifier.padding(iconPadding2.dp).size(iconSize2.dp)) }
                     }
                     val pressedAlpha = 0.12f
                     val focusedAlpha = 0.12f
@@ -434,7 +468,51 @@ fun ColorSchemeGallery(onEditClick: (() -> Unit)? = null) {
                         Token(overlayStateColor(colors.background, colors.onBackground, hoveredAlpha), colors.onBackground, "background Hovered")
                     }
 
+                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        Token(overlayStateColor(colors.primaryFixed, colors.onPrimaryFixed, pressedAlpha), colors.onPrimaryFixed, "primaryFixed Pressed")
+                        Token(overlayStateColor(colors.primaryFixedDim, colors.onPrimaryFixedVariant, pressedAlpha), colors.onPrimaryFixedVariant, "primaryFixedDim Pressed")
+                        Token(overlayStateColor(colors.secondaryFixed, colors.onSecondaryFixed, pressedAlpha), colors.onSecondaryFixed, "secondaryFixed Pressed")
+                        Token(overlayStateColor(colors.secondaryFixedDim, colors.onSecondaryFixedVariant, pressedAlpha), colors.onSecondaryFixedVariant, "secondaryFixedDim Pressed")
+                    }
+                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        Token(overlayStateColor(colors.primaryFixed, colors.onPrimaryFixed, focusedAlpha), colors.onPrimaryFixed, "primaryFixed Focused")
+                        Token(overlayStateColor(colors.primaryFixedDim, colors.onPrimaryFixedVariant, focusedAlpha), colors.onPrimaryFixedVariant, "primaryFixedDim Focused")
+                        Token(overlayStateColor(colors.secondaryFixed, colors.onSecondaryFixed, focusedAlpha), colors.onSecondaryFixed, "secondaryFixed Focused")
+                        Token(overlayStateColor(colors.secondaryFixedDim, colors.onSecondaryFixedVariant, focusedAlpha), colors.onSecondaryFixedVariant, "secondaryFixedDim Focused")
+                    }
+                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        Token(overlayStateColor(colors.primaryFixed, colors.onPrimaryFixed, hoveredAlpha), colors.onPrimaryFixed, "primaryFixed Hovered")
+                        Token(overlayStateColor(colors.primaryFixedDim, colors.onPrimaryFixedVariant, hoveredAlpha), colors.onPrimaryFixedVariant, "primaryFixedDim Hovered")
+                        Token(overlayStateColor(colors.secondaryFixed, colors.onSecondaryFixed, hoveredAlpha), colors.onSecondaryFixed, "secondaryFixed Hovered")
+                        Token(overlayStateColor(colors.secondaryFixedDim, colors.onSecondaryFixedVariant, hoveredAlpha), colors.onSecondaryFixedVariant, "secondaryFixedDim Hovered")
+                    }
+
+                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        Token(overlayStateColor(colors.tertiaryFixed, colors.onTertiaryFixed, pressedAlpha), colors.onTertiaryFixed, "tertiaryFixed Pressed")
+                        Token(overlayStateColor(colors.tertiaryFixedDim, colors.onTertiaryFixedVariant, pressedAlpha), colors.onTertiaryFixedVariant, "tertiaryFixedDim Pressed")
+                        Token(overlayStateColor(colors.inversePrimary, colors.inverseOnSurface, pressedAlpha), colors.inverseOnSurface, "inversePrimary Pressed")
+                    }
+                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        Token(overlayStateColor(colors.tertiaryFixed, colors.onTertiaryFixed, focusedAlpha), colors.onTertiaryFixed, "tertiaryFixed Focused")
+                        Token(overlayStateColor(colors.tertiaryFixedDim, colors.onTertiaryFixedVariant, focusedAlpha), colors.onTertiaryFixedVariant, "tertiaryFixedDim Focused")
+                        Token(overlayStateColor(colors.inversePrimary, colors.inverseOnSurface, focusedAlpha), colors.inverseOnSurface, "inversePrimary Focused")
+                    }
+                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        Token(overlayStateColor(colors.tertiaryFixed, colors.onTertiaryFixed, hoveredAlpha), colors.onTertiaryFixed, "tertiaryFixed Hovered")
+                        Token(overlayStateColor(colors.tertiaryFixedDim, colors.onTertiaryFixedVariant, hoveredAlpha), colors.onTertiaryFixedVariant, "tertiaryFixedDim Hovered")
+                        Token(overlayStateColor(colors.inversePrimary, colors.inverseOnSurface, hoveredAlpha), colors.inverseOnSurface, "inversePrimary Hovered")
+                    }
+
                     var previewFamily by remember { mutableStateOf(0) }
+                    var previewWidth by remember { mutableStateOf(160f) }
+                    var previewHeight by remember { mutableStateOf(60f) }
+                    var previewRadius by remember { mutableStateOf(12f) }
+                    var previewShadow by remember { mutableStateOf(0f) }
+                    var previewTonal by remember { mutableStateOf(0f) }
+                    var previewOutline by remember { mutableStateOf(0f) }
+                    var borderSource by remember { mutableStateOf(0) }
+                    var useElevatedCard by remember { mutableStateOf(false) }
+                    var shapePreset by remember { mutableStateOf(0) }
                     Text("预览容器")
                     Row(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
                         RadioButton(selected = previewFamily == 5, onClick = { previewFamily = 5 })
@@ -458,6 +536,64 @@ fun ColorSchemeGallery(onEditClick: (() -> Unit)? = null) {
                         RadioButton(selected = previewFamily == 4, onClick = { previewFamily = 4 })
                         Text("accent")
                     }
+                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
+                        RadioButton(selected = previewFamily == 9, onClick = { previewFamily = 9 })
+                        Text("tertiaryFixed")
+                        RadioButton(selected = previewFamily == 10, onClick = { previewFamily = 10 })
+                        Text("tertiaryFixedDim")
+                        RadioButton(selected = previewFamily == 11, onClick = { previewFamily = 11 })
+                        Text("inversePrimary")
+                        RadioButton(selected = previewFamily == 12, onClick = { previewFamily = 12 })
+                        Text("primaryFixed")
+                    }
+                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
+                        RadioButton(selected = previewFamily == 13, onClick = { previewFamily = 13 })
+                        Text("primaryFixedDim")
+                        RadioButton(selected = previewFamily == 14, onClick = { previewFamily = 14 })
+                        Text("secondaryFixed")
+                        RadioButton(selected = previewFamily == 15, onClick = { previewFamily = 15 })
+                        Text("secondaryFixedDim")
+                    }
+                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
+                        Text("预览宽度")
+                        Slider(value = previewWidth, onValueChange = { previewWidth = it }, valueRange = 80f..320f, modifier = Modifier.weight(1f))
+                        Text(previewWidth.toInt().toString())
+                        Text("预览高度")
+                        Slider(value = previewHeight, onValueChange = { previewHeight = it }, valueRange = 40f..200f, modifier = Modifier.weight(1f))
+                        Text(previewHeight.toInt().toString())
+                        Text("圆角")
+                        Slider(value = previewRadius, onValueChange = { previewRadius = it }, valueRange = 0f..48f, modifier = Modifier.weight(1f))
+                        Text(previewRadius.toInt().toString())
+                    }
+                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
+                        Text("海拔")
+                        Slider(value = previewShadow, onValueChange = { previewShadow = it }, valueRange = 0f..16f, modifier = Modifier.weight(1f))
+                        Text("${previewShadow.toInt()}dp")
+                        Text("Tonal")
+                        Slider(value = previewTonal, onValueChange = { previewTonal = it }, valueRange = 0f..16f, modifier = Modifier.weight(1f))
+                        Text("${previewTonal.toInt()}dp")
+                        Text("描边")
+                        Slider(value = previewOutline, onValueChange = { previewOutline = it }, valueRange = 0f..8f, modifier = Modifier.weight(1f))
+                        Text(previewOutline.toInt().toString())
+                    }
+                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
+                        RadioButton(selected = borderSource == 0, onClick = { borderSource = 0 })
+                        Text("outline")
+                        RadioButton(selected = borderSource == 1, onClick = { borderSource = 1 })
+                        Text("accent")
+                        RadioButton(selected = borderSource == 2, onClick = { borderSource = 2 })
+                        Text("onSurface")
+                        LabeledSwitch("ElevatedCard", useElevatedCard) { useElevatedCard = it }
+                    }
+                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
+                        Text("形状预设")
+                        RadioButton(selected = shapePreset == 0, onClick = { shapePreset = 0 })
+                        Text("Rounded")
+                        RadioButton(selected = shapePreset == 1, onClick = { shapePreset = 1 })
+                        Text("Cut")
+                        RadioButton(selected = shapePreset == 2, onClick = { shapePreset = 2 })
+                        Text("Circle")
+                    }
                     val previewBase = when (previewFamily) {
                         0 -> surfaceBase
                         1 -> contBase
@@ -467,7 +603,14 @@ fun ColorSchemeGallery(onEditClick: (() -> Unit)? = null) {
                         5 -> accentContainer
                         6 -> colors.error
                         7 -> colors.errorContainer
-                        else -> colors.background
+                        8 -> colors.background
+                        9 -> colors.tertiaryFixed
+                        10 -> colors.tertiaryFixedDim
+                        12 -> colors.primaryFixed
+                        13 -> colors.primaryFixedDim
+                        14 -> colors.secondaryFixed
+                        15 -> colors.secondaryFixedDim
+                        else -> colors.inversePrimary
                     }
                     val previewContent = when (previewFamily) {
                         0, 1 -> surfaceContent
@@ -477,30 +620,49 @@ fun ColorSchemeGallery(onEditClick: (() -> Unit)? = null) {
                         5 -> onAccentContainer
                         6 -> colors.onError
                         7 -> colors.onErrorContainer
-                        else -> colors.onBackground
+                        8 -> colors.onBackground
+                        9 -> colors.onTertiaryFixed
+                        10 -> colors.onTertiaryFixedVariant
+                        12 -> colors.onPrimaryFixed
+                        13 -> colors.onPrimaryFixedVariant
+                        14 -> colors.onSecondaryFixed
+                        15 -> colors.onSecondaryFixedVariant
+                        else -> colors.inverseOnSurface
+                    }
+                    val borderColor = when (borderSource) {
+                        0 -> colors.outline
+                        1 -> accent
+                        else -> surfaceContent
+                    }
+                    val previewShape = when (shapePreset) { 0 -> RoundedCornerShape(previewRadius.toInt().dp); 1 -> CutCornerShape(previewRadius.toInt().dp); else -> CircleShape }
+                    Row(horizontalArrangement = Arrangement.spacedBy(12.dp), verticalAlignment = Alignment.CenterVertically) {
+                        Surface(color = overlayStateColor(previewBase, previewContent, pressedAlpha), shape = previewShape, shadowElevation = previewShadow.toInt().dp, tonalElevation = previewTonal.toInt().dp, border = if (previewOutline > 0f) BorderStroke(previewOutline.toInt().dp, borderColor) else null) {
+                            Box(modifier = Modifier.size(previewWidth.toInt().dp, previewHeight.toInt().dp), contentAlignment = Alignment.Center) { Text("Surface Pressed", color = previewContent) }
+                        }
+                        if (useElevatedCard) ElevatedCard(colors = CardDefaults.elevatedCardColors(containerColor = overlayStateColor(previewBase, previewContent, pressedAlpha)), shape = previewShape, elevation = CardDefaults.elevatedCardElevation(defaultElevation = previewShadow.toInt().dp)) {
+                            Box(modifier = Modifier.size(previewWidth.toInt().dp, previewHeight.toInt().dp), contentAlignment = Alignment.Center) { Text("ElevatedCard Pressed", color = previewContent) }
+                        } else Card(colors = CardDefaults.cardColors(containerColor = overlayStateColor(previewBase, previewContent, pressedAlpha)), shape = previewShape, elevation = CardDefaults.cardElevation(defaultElevation = previewShadow.toInt().dp)) {
+                            Box(modifier = Modifier.size(previewWidth.toInt().dp, previewHeight.toInt().dp), contentAlignment = Alignment.Center) { Text("Card Pressed", color = previewContent) }
+                        }
                     }
                     Row(horizontalArrangement = Arrangement.spacedBy(12.dp), verticalAlignment = Alignment.CenterVertically) {
-                        Surface(color = overlayStateColor(previewBase, previewContent, pressedAlpha), shape = RoundedCornerShape(12.dp)) {
-                            Box(modifier = Modifier.size(160.dp, 60.dp), contentAlignment = Alignment.Center) { Text("Surface Pressed", color = previewContent) }
+                        Surface(color = overlayStateColor(previewBase, previewContent, focusedAlpha), shape = previewShape, shadowElevation = previewShadow.toInt().dp, tonalElevation = previewTonal.toInt().dp, border = if (previewOutline > 0f) BorderStroke(previewOutline.toInt().dp, borderColor) else null) {
+                            Box(modifier = Modifier.size(previewWidth.toInt().dp, previewHeight.toInt().dp), contentAlignment = Alignment.Center) { Text("Surface Focused", color = previewContent) }
                         }
-                        Card(colors = CardDefaults.cardColors(containerColor = overlayStateColor(previewBase, previewContent, pressedAlpha)), shape = RoundedCornerShape(12.dp)) {
-                            Box(modifier = Modifier.size(160.dp, 60.dp), contentAlignment = Alignment.Center) { Text("Card Pressed", color = previewContent) }
-                        }
-                    }
-                    Row(horizontalArrangement = Arrangement.spacedBy(12.dp), verticalAlignment = Alignment.CenterVertically) {
-                        Surface(color = overlayStateColor(previewBase, previewContent, focusedAlpha), shape = RoundedCornerShape(12.dp)) {
-                            Box(modifier = Modifier.size(160.dp, 60.dp), contentAlignment = Alignment.Center) { Text("Surface Focused", color = previewContent) }
-                        }
-                        Card(colors = CardDefaults.cardColors(containerColor = overlayStateColor(previewBase, previewContent, focusedAlpha)), shape = RoundedCornerShape(12.dp)) {
-                            Box(modifier = Modifier.size(160.dp, 60.dp), contentAlignment = Alignment.Center) { Text("Card Focused", color = previewContent) }
+                        if (useElevatedCard) ElevatedCard(colors = CardDefaults.elevatedCardColors(containerColor = overlayStateColor(previewBase, previewContent, focusedAlpha)), shape = previewShape, elevation = CardDefaults.elevatedCardElevation(defaultElevation = previewShadow.toInt().dp)) {
+                            Box(modifier = Modifier.size(previewWidth.toInt().dp, previewHeight.toInt().dp), contentAlignment = Alignment.Center) { Text("ElevatedCard Focused", color = previewContent) }
+                        } else Card(colors = CardDefaults.cardColors(containerColor = overlayStateColor(previewBase, previewContent, focusedAlpha)), shape = previewShape, elevation = CardDefaults.cardElevation(defaultElevation = previewShadow.toInt().dp)) {
+                            Box(modifier = Modifier.size(previewWidth.toInt().dp, previewHeight.toInt().dp), contentAlignment = Alignment.Center) { Text("Card Focused", color = previewContent) }
                         }
                     }
                     Row(horizontalArrangement = Arrangement.spacedBy(12.dp), verticalAlignment = Alignment.CenterVertically) {
-                        Surface(color = overlayStateColor(previewBase, previewContent, hoveredAlpha), shape = RoundedCornerShape(12.dp)) {
-                            Box(modifier = Modifier.size(160.dp, 60.dp), contentAlignment = Alignment.Center) { Text("Surface Hovered", color = previewContent) }
+                        Surface(color = overlayStateColor(previewBase, previewContent, hoveredAlpha), shape = previewShape, shadowElevation = previewShadow.toInt().dp, tonalElevation = previewTonal.toInt().dp, border = if (previewOutline > 0f) BorderStroke(previewOutline.toInt().dp, borderColor) else null) {
+                            Box(modifier = Modifier.size(previewWidth.toInt().dp, previewHeight.toInt().dp), contentAlignment = Alignment.Center) { Text("Surface Hovered", color = previewContent) }
                         }
-                        Card(colors = CardDefaults.cardColors(containerColor = overlayStateColor(previewBase, previewContent, hoveredAlpha)), shape = RoundedCornerShape(12.dp)) {
-                            Box(modifier = Modifier.size(160.dp, 60.dp), contentAlignment = Alignment.Center) { Text("Card Hovered", color = previewContent) }
+                        if (useElevatedCard) ElevatedCard(colors = CardDefaults.elevatedCardColors(containerColor = overlayStateColor(previewBase, previewContent, hoveredAlpha)), shape = previewShape, elevation = CardDefaults.elevatedCardElevation(defaultElevation = previewShadow.toInt().dp)) {
+                            Box(modifier = Modifier.size(previewWidth.toInt().dp, previewHeight.toInt().dp), contentAlignment = Alignment.Center) { Text("ElevatedCard Hovered", color = previewContent) }
+                        } else Card(colors = CardDefaults.cardColors(containerColor = overlayStateColor(previewBase, previewContent, hoveredAlpha)), shape = previewShape, elevation = CardDefaults.cardElevation(defaultElevation = previewShadow.toInt().dp)) {
+                            Box(modifier = Modifier.size(previewWidth.toInt().dp, previewHeight.toInt().dp), contentAlignment = Alignment.Center) { Text("Card Hovered", color = previewContent) }
                         }
                     }
                 }
@@ -517,9 +679,9 @@ fun ColorSchemeGallery(onEditClick: (() -> Unit)? = null) {
             ) {
                 var enabled by remember { mutableStateOf(true) }
                 var useContainer by remember { mutableStateOf(true) }
+                LabeledSwitch("启用", enabled) { enabled = it }
+                LabeledSwitch("容器变体", useContainer) { useContainer = it }
                 Row(horizontalArrangement = Arrangement.spacedBy(12.dp), verticalAlignment = Alignment.CenterVertically) {
-                    LabeledSwitch("启用", enabled) { enabled = it }
-                    LabeledSwitch("容器变体", useContainer) { useContainer = it }
                     if (useContainer) {
                         FilledTonalButton(onClick = {}, enabled = enabled) { Text("FilledTonal") }
                     } else {
@@ -552,8 +714,8 @@ fun ColorSchemeGallery(onEditClick: (() -> Unit)? = null) {
                 )
             ) {
                 var useContainer by remember { mutableStateOf(true) }
+                LabeledSwitch("容器变体", useContainer) { useContainer = it }
                 Row(horizontalArrangement = Arrangement.spacedBy(12.dp), verticalAlignment = Alignment.CenterVertically) {
-                    LabeledSwitch("容器变体", useContainer) { useContainer = it }
                     val container = if (useContainer) colors.tertiaryContainer else colors.tertiary
                     val content = if (useContainer) colors.onTertiaryContainer else colors.onTertiary
                     Card(colors = CardDefaults.cardColors(containerColor = container)) {
@@ -604,9 +766,9 @@ fun ColorSchemeGallery(onEditClick: (() -> Unit)? = null) {
             ) {
                 var useContainer by remember { mutableStateOf(false) }
                 var enabled by remember { mutableStateOf(true) }
+                LabeledSwitch("启用输入", enabled) { enabled = it }
+                LabeledSwitch("容器变体", useContainer) { useContainer = it }
                 Row(horizontalArrangement = Arrangement.spacedBy(12.dp), verticalAlignment = Alignment.CenterVertically) {
-                    LabeledSwitch("启用输入", enabled) { enabled = it }
-                    LabeledSwitch("容器变体", useContainer) { useContainer = it }
                     val bg = if (useContainer) colors.surfaceContainer else colors.background
                     val fg = if (useContainer) colors.onSurface else colors.onBackground
                     Surface(color = bg) {
@@ -629,8 +791,8 @@ fun ColorSchemeGallery(onEditClick: (() -> Unit)? = null) {
                 )
             ) {
                 Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                    LabeledSwitch("启用", outlinedEnabled) { outlinedEnabled = it }
                     Row(horizontalArrangement = Arrangement.spacedBy(12.dp), verticalAlignment = Alignment.CenterVertically) {
-                        LabeledSwitch("启用", outlinedEnabled) { outlinedEnabled = it }
                         OutlinedButton(onClick = {}, enabled = outlinedEnabled) { Text("Outlined") }
                         OutlinedTextField(value = textValue, onValueChange = { textValue = it }, label = { Text("Label") }, enabled = outlinedEnabled)
                         Token(colors.outline, colors.onSurface, "outline")
@@ -663,10 +825,12 @@ fun ColorSchemeGallery(onEditClick: (() -> Unit)? = null) {
                 val max = 20
                 val accent = when (source) { 0 -> colors.primary; 1 -> colors.secondary; else -> colors.tertiary }
                 Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    LabeledSwitch("启用", enabled) { enabled = it }
                     Row(horizontalArrangement = Arrangement.spacedBy(12.dp), verticalAlignment = Alignment.CenterVertically) {
-                        LabeledSwitch("启用", enabled) { enabled = it }
                         LabeledSwitch("错误", isError) { isError = it }
                         LabeledSwitch("帮助", showHelp) { showHelp = it }
+                    }
+                    Row(horizontalArrangement = Arrangement.spacedBy(12.dp), verticalAlignment = Alignment.CenterVertically) {
                         LabeledSwitch("占位", showPlaceholder) { showPlaceholder = it }
                         LabeledSwitch("计数", showCounter) { showCounter = it }
                         LabeledSwitch("前缀", leading) { leading = it }
@@ -838,8 +1002,8 @@ fun ColorSchemeGallery(onEditClick: (() -> Unit)? = null) {
             ) {
                 var enabled by remember { mutableStateOf(true) }
                 var useContainer by remember { mutableStateOf(false) }
+                LabeledSwitch("启用", enabled) { enabled = it }
                 Row(horizontalArrangement = Arrangement.spacedBy(12.dp), verticalAlignment = Alignment.CenterVertically) {
-                    LabeledSwitch("启用", enabled) { enabled = it }
                     LabeledSwitch("容器变体", useContainer) { useContainer = it }
                     Button(onClick = {}, enabled = enabled) { Text("正常") }
                     Button(
@@ -880,8 +1044,8 @@ fun ColorSchemeGallery(onEditClick: (() -> Unit)? = null) {
                 )
             ) {
                 var enabledSel by remember { mutableStateOf(true) }
+                LabeledSwitch("启用", enabledSel) { enabledSel = it }
                 Row(horizontalArrangement = Arrangement.spacedBy(12.dp), verticalAlignment = Alignment.CenterVertically) {
-                    LabeledSwitch("启用", enabledSel) { enabledSel = it }
                     LabeledSwitch("选中", checked) { checked = it }
                     Switch(checked = checked, onCheckedChange = { checked = it }, enabled = enabledSel)
                     Checkbox(checked = checked, onCheckedChange = { checked = it }, enabled = enabledSel)
@@ -908,8 +1072,8 @@ fun ColorSchemeGallery(onEditClick: (() -> Unit)? = null) {
                     else -> SnackbarDuration.Short
                 }
                 Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    LabeledSwitch("启用", enabled) { enabled = it }
                     Row(horizontalArrangement = Arrangement.spacedBy(12.dp), verticalAlignment = Alignment.CenterVertically) {
-                        LabeledSwitch("启用", enabled) { enabled = it }
                         LabeledSwitch("Action", action) { action = it }
                         LabeledSwitch("顶部", top) { top = it }
                         LabeledSwitch("长时长", long) { long = it }
