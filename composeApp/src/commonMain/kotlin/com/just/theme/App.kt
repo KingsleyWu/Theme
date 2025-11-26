@@ -371,6 +371,52 @@ fun ColorSchemeGallery(onEditClick: (() -> Unit)? = null) {
                         Token(overlayStateColor(accent, onAccent, hoveredAlpha), onAccent, "accent Hovered")
                         Token(overlayStateColor(accentContainer, onAccentContainer, hoveredAlpha), onAccentContainer, "accentContainer Hovered")
                     }
+
+                    var contLevel by remember { mutableStateOf(2) }
+                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
+                        Text("容器层级")
+                        RadioButton(selected = contLevel == 0, onClick = { contLevel = 0 })
+                        Text("lowest")
+                        RadioButton(selected = contLevel == 1, onClick = { contLevel = 1 })
+                        Text("low")
+                        RadioButton(selected = contLevel == 2, onClick = { contLevel = 2 })
+                        Text("base")
+                        RadioButton(selected = contLevel == 3, onClick = { contLevel = 3 })
+                        Text("high")
+                        RadioButton(selected = contLevel == 4, onClick = { contLevel = 4 })
+                        Text("highest")
+                    }
+                    val surfaceBase = colors.surface
+                    val surfaceContent = colors.onSurface
+                    val variantBase = colors.surfaceVariant
+                    val variantContent = colors.onSurfaceVariant
+                    val inverseBase = colors.inverseSurface
+                    val inverseContent = colors.inverseOnSurface
+                    val contBase = when (contLevel) {
+                        0 -> colors.surfaceContainerLowest
+                        1 -> colors.surfaceContainerLow
+                        2 -> colors.surfaceContainer
+                        3 -> colors.surfaceContainerHigh
+                        else -> colors.surfaceContainerHighest
+                    }
+                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        Token(overlayStateColor(surfaceBase, surfaceContent, pressedAlpha), surfaceContent, "surface Pressed")
+                        Token(overlayStateColor(contBase, surfaceContent, pressedAlpha), surfaceContent, "surfaceContainer Pressed")
+                        Token(overlayStateColor(variantBase, variantContent, pressedAlpha), variantContent, "surfaceVariant Pressed")
+                        Token(overlayStateColor(inverseBase, inverseContent, pressedAlpha), inverseContent, "inverseSurface Pressed")
+                    }
+                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        Token(overlayStateColor(surfaceBase, surfaceContent, focusedAlpha), surfaceContent, "surface Focused")
+                        Token(overlayStateColor(contBase, surfaceContent, focusedAlpha), surfaceContent, "surfaceContainer Focused")
+                        Token(overlayStateColor(variantBase, variantContent, focusedAlpha), variantContent, "surfaceVariant Focused")
+                        Token(overlayStateColor(inverseBase, inverseContent, focusedAlpha), inverseContent, "inverseSurface Focused")
+                    }
+                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        Token(overlayStateColor(surfaceBase, surfaceContent, hoveredAlpha), surfaceContent, "surface Hovered")
+                        Token(overlayStateColor(contBase, surfaceContent, hoveredAlpha), surfaceContent, "surfaceContainer Hovered")
+                        Token(overlayStateColor(variantBase, variantContent, hoveredAlpha), variantContent, "surfaceVariant Hovered")
+                        Token(overlayStateColor(inverseBase, inverseContent, hoveredAlpha), inverseContent, "inverseSurface Hovered")
+                    }
                 }
             }
 
