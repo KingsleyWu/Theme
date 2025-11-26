@@ -373,8 +373,8 @@ fun ColorSchemeGallery(onEditClick: (() -> Unit)? = null) {
                     }
 
                     var contLevel by remember { mutableStateOf(2) }
+                    Text("容器层级")
                     Row(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
-                        Text("容器层级")
                         RadioButton(selected = contLevel == 0, onClick = { contLevel = 0 })
                         Text("lowest")
                         RadioButton(selected = contLevel == 1, onClick = { contLevel = 1 })
@@ -416,6 +416,92 @@ fun ColorSchemeGallery(onEditClick: (() -> Unit)? = null) {
                         Token(overlayStateColor(contBase, surfaceContent, hoveredAlpha), surfaceContent, "surfaceContainer Hovered")
                         Token(overlayStateColor(variantBase, variantContent, hoveredAlpha), variantContent, "surfaceVariant Hovered")
                         Token(overlayStateColor(inverseBase, inverseContent, hoveredAlpha), inverseContent, "inverseSurface Hovered")
+                    }
+
+                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        Token(overlayStateColor(colors.error, colors.onError, pressedAlpha), colors.onError, "error Pressed")
+                        Token(overlayStateColor(colors.errorContainer, colors.onErrorContainer, pressedAlpha), colors.onErrorContainer, "errorContainer Pressed")
+                        Token(overlayStateColor(colors.background, colors.onBackground, pressedAlpha), colors.onBackground, "background Pressed")
+                    }
+                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        Token(overlayStateColor(colors.error, colors.onError, focusedAlpha), colors.onError, "error Focused")
+                        Token(overlayStateColor(colors.errorContainer, colors.onErrorContainer, focusedAlpha), colors.onErrorContainer, "errorContainer Focused")
+                        Token(overlayStateColor(colors.background, colors.onBackground, focusedAlpha), colors.onBackground, "background Focused")
+                    }
+                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        Token(overlayStateColor(colors.error, colors.onError, hoveredAlpha), colors.onError, "error Hovered")
+                        Token(overlayStateColor(colors.errorContainer, colors.onErrorContainer, hoveredAlpha), colors.onErrorContainer, "errorContainer Hovered")
+                        Token(overlayStateColor(colors.background, colors.onBackground, hoveredAlpha), colors.onBackground, "background Hovered")
+                    }
+
+                    var previewFamily by remember { mutableStateOf(0) }
+                    Text("预览容器")
+                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
+                        RadioButton(selected = previewFamily == 5, onClick = { previewFamily = 5 })
+                        Text("accentContainer")
+                        RadioButton(selected = previewFamily == 6, onClick = { previewFamily = 6 })
+                        Text("error")
+                        RadioButton(selected = previewFamily == 7, onClick = { previewFamily = 7 })
+                        Text("errorContainer")
+                        RadioButton(selected = previewFamily == 8, onClick = { previewFamily = 8 })
+                        Text("background")
+                        RadioButton(selected = previewFamily == 0, onClick = { previewFamily = 0 })
+                        Text("surface")
+                    }
+                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
+                        RadioButton(selected = previewFamily == 1, onClick = { previewFamily = 1 })
+                        Text("surfaceContainer")
+                        RadioButton(selected = previewFamily == 2, onClick = { previewFamily = 2 })
+                        Text("surfaceVariant")
+                        RadioButton(selected = previewFamily == 3, onClick = { previewFamily = 3 })
+                        Text("inverseSurface")
+                        RadioButton(selected = previewFamily == 4, onClick = { previewFamily = 4 })
+                        Text("accent")
+                    }
+                    val previewBase = when (previewFamily) {
+                        0 -> surfaceBase
+                        1 -> contBase
+                        2 -> variantBase
+                        3 -> inverseBase
+                        4 -> accent
+                        5 -> accentContainer
+                        6 -> colors.error
+                        7 -> colors.errorContainer
+                        else -> colors.background
+                    }
+                    val previewContent = when (previewFamily) {
+                        0, 1 -> surfaceContent
+                        2 -> variantContent
+                        3 -> inverseContent
+                        4 -> onAccent
+                        5 -> onAccentContainer
+                        6 -> colors.onError
+                        7 -> colors.onErrorContainer
+                        else -> colors.onBackground
+                    }
+                    Row(horizontalArrangement = Arrangement.spacedBy(12.dp), verticalAlignment = Alignment.CenterVertically) {
+                        Surface(color = overlayStateColor(previewBase, previewContent, pressedAlpha), shape = RoundedCornerShape(12.dp)) {
+                            Box(modifier = Modifier.size(160.dp, 60.dp), contentAlignment = Alignment.Center) { Text("Surface Pressed", color = previewContent) }
+                        }
+                        Card(colors = CardDefaults.cardColors(containerColor = overlayStateColor(previewBase, previewContent, pressedAlpha)), shape = RoundedCornerShape(12.dp)) {
+                            Box(modifier = Modifier.size(160.dp, 60.dp), contentAlignment = Alignment.Center) { Text("Card Pressed", color = previewContent) }
+                        }
+                    }
+                    Row(horizontalArrangement = Arrangement.spacedBy(12.dp), verticalAlignment = Alignment.CenterVertically) {
+                        Surface(color = overlayStateColor(previewBase, previewContent, focusedAlpha), shape = RoundedCornerShape(12.dp)) {
+                            Box(modifier = Modifier.size(160.dp, 60.dp), contentAlignment = Alignment.Center) { Text("Surface Focused", color = previewContent) }
+                        }
+                        Card(colors = CardDefaults.cardColors(containerColor = overlayStateColor(previewBase, previewContent, focusedAlpha)), shape = RoundedCornerShape(12.dp)) {
+                            Box(modifier = Modifier.size(160.dp, 60.dp), contentAlignment = Alignment.Center) { Text("Card Focused", color = previewContent) }
+                        }
+                    }
+                    Row(horizontalArrangement = Arrangement.spacedBy(12.dp), verticalAlignment = Alignment.CenterVertically) {
+                        Surface(color = overlayStateColor(previewBase, previewContent, hoveredAlpha), shape = RoundedCornerShape(12.dp)) {
+                            Box(modifier = Modifier.size(160.dp, 60.dp), contentAlignment = Alignment.Center) { Text("Surface Hovered", color = previewContent) }
+                        }
+                        Card(colors = CardDefaults.cardColors(containerColor = overlayStateColor(previewBase, previewContent, hoveredAlpha)), shape = RoundedCornerShape(12.dp)) {
+                            Box(modifier = Modifier.size(160.dp, 60.dp), contentAlignment = Alignment.Center) { Text("Card Hovered", color = previewContent) }
+                        }
                     }
                 }
             }
