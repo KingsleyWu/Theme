@@ -1,62 +1,20 @@
 package com.just.theme
 
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.wrapContentSize
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Button
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.Checkbox
-import androidx.compose.material3.Divider
-import androidx.compose.material3.FilledTonalButton
-import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.*
 import androidx.compose.material3.LinearProgressIndicator
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.RadioButton
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.SnackbarHost
-import androidx.compose.material3.SnackbarHostState
-import androidx.compose.material3.Surface
-import androidx.compose.material3.Switch
-import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
-import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.Slider
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.VerticalDivider
-import androidx.compose.material3.rememberTopAppBarState
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.setValue
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import org.jetbrains.compose.ui.tooling.preview.Preview
-import androidx.compose.material3.ColorScheme
-import androidx.compose.material3.lightColorScheme
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
 import kotlin.math.roundToInt
 
 @Composable
@@ -90,6 +48,9 @@ fun ColorSchemeGallery(onEditClick: (() -> Unit)? = null) {
     var showOverlay by remember { mutableStateOf(false) }
     var textValue by remember { mutableStateOf("") }
     var checked by remember { mutableStateOf(true) }
+    var enabledPrimary by remember { mutableStateOf(true) }
+    var outlinedEnabled by remember { mutableStateOf(true) }
+    var elevatedSurface by remember { mutableStateOf(true) }
     Scaffold(
         topBar = {
             TopAppBar(title = { Text("ColorScheme 示例") }, actions = {
@@ -106,177 +67,317 @@ fun ColorSchemeGallery(onEditClick: (() -> Unit)? = null) {
                 .padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(24.dp)
         ) {
-            Column(modifier = Modifier.fillMaxWidth()) {
-                SectionTitle("Primary 家族")
-                Text("primary：主色。用于高强调交互控件容器（如 Button、选中态）。")
-                Text("onPrimary：主色容器上的文本/图标色，保证对比度。")
-                Text("primaryContainer：主色容器背景，适合卡片或大面积强调背景。")
-                Text("onPrimaryContainer：主色容器上的文本/图标色。")
-                Text("inversePrimary：反色环境下的强调动作色（例如 Snackbar 的 action）。")
-            }
-            Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                Button(onClick = {}) { Text("Button") }
-                TextButton(onClick = {}) { Text("TextButton") }
-                Token(colors.primary, colors.onPrimary, "primary/onPrimary")
-                Token(colors.primaryContainer, colors.onPrimaryContainer, "primaryContainer/onPrimaryContainer")
-            }
-
-            Column(modifier = Modifier.fillMaxWidth()) {
-                SectionTitle("Secondary 家族")
-                Text("secondary：次强调色。用于次要交互或选中态的容器色。")
-                Text("onSecondary：次强调容器上的文本/图标色。")
-                Text("secondaryContainer：次强调容器背景（如 FilledTonalButton）。")
-                Text("onSecondaryContainer：次强调容器上的文本/图标色。")
-            }
-            Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                FilledTonalButton(onClick = {}) { Text("FilledTonal") }
-                FloatingActionButton(onClick = {}) { Text("+") }
-                Token(colors.secondary, colors.onSecondary, "secondary/onSecondary")
-                Token(colors.secondaryContainer, colors.onSecondaryContainer, "secondaryContainer/onSecondaryContainer")
-            }
-
-            Column(modifier = Modifier.fillMaxWidth()) {
-                SectionTitle("Tertiary 家族")
-                Text("tertiary：第三强调色。用于差异化点缀或分类的强调。")
-                Text("onTertiary：第三强调容器上的文本/图标色。")
-                Text("tertiaryContainer：第三强调容器背景。")
-                Text("onTertiaryContainer：第三强调容器上的文本/图标色。")
-            }
-            Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                Token(colors.tertiary, colors.onTertiary, "tertiary/onTertiary")
-                Token(colors.tertiaryContainer, colors.onTertiaryContainer, "tertiaryContainer/onTertiaryContainer")
-            }
-
-            Column(modifier = Modifier.fillMaxWidth()) {
-                SectionTitle("Surface 与内容")
-                Text("surface：常规组件容器背景（Card、AppBar 等）。")
-                Text("onSurface：容器上的文本/图标色。")
-                Text("surfaceVariant：次要容器背景/分隔元素。")
-                Text("onSurfaceVariant：在次要容器上的文本/图标色。")
-                Text("surfaceTint：用于 Elevated 组件的加色，体现海拔。")
-            }
-            Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                Card {
-                    Box(modifier = Modifier.size(120.dp, 60.dp), contentAlignment = Alignment.Center) {
-                        Text("Surface", color = colors.onSurface)
-                    }
-                }
-                VerticalDivider(thickness = 1.dp)
-                ElevatedSurfaceSample()
-                Token(colors.surfaceVariant, colors.onSurfaceVariant, "surfaceVariant/onSurfaceVariant")
-            }
-            Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                Token(colors.surfaceBright, colors.onSurface, "surfaceBright")
-                Token(colors.surfaceDim, colors.onSurface, "surfaceDim")
-            }
-
-            Column(modifier = Modifier.fillMaxWidth()) {
-                SectionTitle("Background 与 onBackground")
-                Text("background：页面背景色（Scaffold 背景）。")
-                Text("onBackground：页面背景上的文本/图标色。")
-            }
-            Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                Surface(color = colors.background) {
-                    Box(modifier = Modifier.size(160.dp, 60.dp), contentAlignment = Alignment.Center) {
-                        Text("Background", color = colors.onBackground)
-                    }
+            Section(
+                title = "Primary 家族",
+                desc = listOf(
+                    "primary：主色。用于高强调交互控件容器（如 Button、选中态）。",
+                    "onPrimary：主色容器上的文本/图标色，保证对比度。",
+                    "primaryContainer：主色容器背景，适合卡片或大面积强调背景。",
+                    "onPrimaryContainer：主色容器上的文本/图标色。",
+                    "inversePrimary：反色环境下的强调动作色（例如 Snackbar 的 action）。",
+                )
+            ) {
+                Row(horizontalArrangement = Arrangement.spacedBy(12.dp), verticalAlignment = Alignment.CenterVertically) {
+                    LabeledSwitch("启用", enabledPrimary) { enabledPrimary = it }
+                    Button(onClick = {}, enabled = enabledPrimary) { Text("Button") }
+                    TextButton(onClick = {}, enabled = enabledPrimary) { Text("TextButton") }
+                    Token(colors.primary, colors.onPrimary, "primary/onPrimary")
+                    Token(colors.primaryContainer, colors.onPrimaryContainer, "primaryContainer/onPrimaryContainer")
                 }
             }
 
-            Column(modifier = Modifier.fillMaxWidth()) {
-                SectionTitle("Outline 与边框")
-                Text("outline：描边主色（Outlined 组件边框等）。")
-                Text("outlineVariant：更弱的描边/分隔线（如 Divider）。")
-                Text("输入光标（cursor）：默认为 primary；可通过 TextFieldDefaults.colors(cursorColor=...) 自定义。")
-            }
-            Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                OutlinedButton(onClick = {}) { Text("Outlined") }
-                OutlinedTextField(value = textValue, onValueChange = { textValue = it }, label = { Text("Label") })
-                Token(colors.outline, colors.onSurface, "outline")
-                Token(colors.outlineVariant, colors.onSurface, "outlineVariant")
-            }
-            Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                Token(colors.primary, colors.onPrimary, "cursor=primary")
-            }
-
-            Column(modifier = Modifier.fillMaxWidth()) {
-                SectionTitle("错误与反馈")
-                Text("error：错误/警示的强调色。")
-                Text("onError：错误容器上的文本/图标色。")
-                Text("errorContainer：错误容器背景（提示卡片等）。")
-                Text("onErrorContainer：错误容器上的文本/图标色。")
-            }
-            Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                Button(onClick = {}) { Text("正常") }
-                Button(onClick = {}) { Text("错误") }
-                Token(colors.error, colors.onError, "error/onError")
-                Token(colors.errorContainer, colors.onErrorContainer, "errorContainer/onErrorContainer")
-            }
-            Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                LinearProgressIndicator(modifier = Modifier.size(160.dp, 6.dp))
-            }
-
-            Column(modifier = Modifier.fillMaxWidth()) {
-                SectionTitle("选择控件")
-                Text("默认选中态使用强调色（通常为 primary）。")
-            }
-            Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                Switch(checked = checked, onCheckedChange = { checked = it })
-                Checkbox(checked = checked, onCheckedChange = { checked = it })
-                RadioButton(selected = checked, onClick = { checked = !checked })
+            Section(
+                title = "Secondary 家族",
+                desc = listOf(
+                    "secondary：次强调色。用于次要交互或选中态的容器色。",
+                    "onSecondary：次强调容器上的文本/图标色。",
+                    "secondaryContainer：次强调容器背景（如 FilledTonalButton）。",
+                    "onSecondaryContainer：次强调容器上的文本/图标色。",
+                )
+            ) {
+                var enabled by remember { mutableStateOf(true) }
+                var useContainer by remember { mutableStateOf(true) }
+                Row(horizontalArrangement = Arrangement.spacedBy(12.dp), verticalAlignment = Alignment.CenterVertically) {
+                    LabeledSwitch("启用", enabled) { enabled = it }
+                    LabeledSwitch("容器变体", useContainer) { useContainer = it }
+                    if (useContainer) {
+                        FilledTonalButton(onClick = {}, enabled = enabled) { Text("FilledTonal") }
+                    } else {
+                        Button(
+                            onClick = {},
+                            enabled = enabled,
+                            colors = androidx.compose.material3.ButtonDefaults.buttonColors(
+                                containerColor = colors.secondary,
+                                contentColor = colors.onSecondary
+                            )
+                        ) { Text("Secondary Button") }
+                    }
+                    FloatingActionButton(
+                        onClick = {},
+                        containerColor = if (useContainer) colors.secondaryContainer else colors.secondary,
+                        contentColor = if (useContainer) colors.onSecondaryContainer else colors.onSecondary
+                    ) { Text("+") }
+                    Token(colors.secondary, colors.onSecondary, "secondary/onSecondary")
+                    Token(colors.secondaryContainer, colors.onSecondaryContainer, "secondaryContainer/onSecondaryContainer")
+                }
             }
 
-            Column(modifier = Modifier.fillMaxWidth()) {
-                SectionTitle("Snackbar 与 inverse")
-                Text("inverseSurface：反色表面（如 Snackbar 容器）。")
-                Text("inverseOnSurface：反色表面上的文本/图标。")
-                Text("inversePrimary：反色环境下的强调动作色（如 Snackbar 操作按钮）。")
-            }
-            Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                Button(onClick = { snackbarCounter++ }) { Text("显示 Snackbar") }
-                Token(colors.inverseSurface, colors.inverseOnSurface, "inverseSurface/inverseOnSurface")
-                Token(colors.inversePrimary, colors.onSurface, "inversePrimary")
-            }
-
-            Column(modifier = Modifier.fillMaxWidth()) {
-                SectionTitle("Scrim 与遮罩")
-                Text("scrim：遮罩层色（模态弹窗/抽屉开启时的背景遮罩）。")
-            }
-            Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                Button(onClick = { showOverlay = true }) { Text("显示遮罩") }
-                Token(colors.scrim, colors.onSurface, "scrim")
-            }
-
-            Column(modifier = Modifier.fillMaxWidth()) {
-                SectionTitle("Surface 容器层级")
-                Text("surfaceContainer*：容器层级建议色；lowest→highest 表示海拔/层级递增。")
-            }
-            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                Token(colors.surfaceContainerLowest, colors.onSurface, "lowest")
-                Token(colors.surfaceContainerLow, colors.onSurface, "low")
-                Token(colors.surfaceContainer, colors.onSurface, "base")
-                Token(colors.surfaceContainerHigh, colors.onSurface, "high")
-                Token(colors.surfaceContainerHighest, colors.onSurface, "highest")
+            Section(
+                title = "Tertiary 家族",
+                desc = listOf(
+                    "tertiary：第三强调色。用于差异化点缀或分类的强调。",
+                    "onTertiary：第三强调容器上的文本/图标色。",
+                    "tertiaryContainer：第三强调容器背景。",
+                    "onTertiaryContainer：第三强调容器上的文本/图标色。",
+                )
+            ) {
+                var useContainer by remember { mutableStateOf(true) }
+                Row(horizontalArrangement = Arrangement.spacedBy(12.dp), verticalAlignment = Alignment.CenterVertically) {
+                    LabeledSwitch("容器变体", useContainer) { useContainer = it }
+                    val container = if (useContainer) colors.tertiaryContainer else colors.tertiary
+                    val content = if (useContainer) colors.onTertiaryContainer else colors.onTertiary
+                    androidx.compose.material3.Card(colors = CardDefaults.cardColors(containerColor = container)) {
+                        Box(modifier = Modifier.size(140.dp, 60.dp), contentAlignment = Alignment.Center) {
+                            Text("Tertiary", color = content)
+                        }
+                    }
+                    Token(colors.tertiary, colors.onTertiary, "tertiary/onTertiary")
+                    Token(colors.tertiaryContainer, colors.onTertiaryContainer, "tertiaryContainer/onTertiaryContainer")
+                }
             }
 
-            Column(modifier = Modifier.fillMaxWidth()) {
-                SectionTitle("Fixed 颜色展示")
-                Text("primaryFixed/Dim：动态色（Android 12+）下的主色固定强度容器。")
-                Text("onPrimaryFixed/Variant：对应容器上的文本/图标色。")
+            Section(
+                title = "Surface 与内容",
+                desc = listOf(
+                    "surface：常规组件容器背景（Card、AppBar 等）。",
+                    "onSurface：容器上的文本/图标色。",
+                    "surfaceVariant：次要容器背景/分隔元素。",
+                    "onSurfaceVariant：在次要容器上的文本/图标色。",
+                    "surfaceTint：用于 Elevated 组件的加色，体现海拔。",
+                )
+            ) {
+                Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                    Row(horizontalArrangement = Arrangement.spacedBy(12.dp), verticalAlignment = Alignment.CenterVertically) {
+                        Card {
+                            Box(modifier = Modifier.size(120.dp, 60.dp), contentAlignment = Alignment.Center) {
+                                Text("Surface", color = colors.onSurface)
+                            }
+                        }
+                        LabeledSwitch("海拔", elevatedSurface) { elevatedSurface = it }
+                        VerticalDivider(thickness = 1.dp)
+                        ElevatedSurfaceSample(elevatedSurface)
+                        Token(colors.surfaceVariant, colors.onSurfaceVariant, "surfaceVariant/onSurfaceVariant")
+                    }
+                    Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                        Token(colors.surfaceBright, colors.onSurface, "surfaceBright")
+                        Token(colors.surfaceDim, colors.onSurface, "surfaceDim")
+                    }
+                }
             }
-            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                Token(colors.primaryFixed, colors.onPrimaryFixed, "primaryFixed/onPrimaryFixed")
-                Token(colors.primaryFixedDim, colors.onPrimaryFixedVariant, "primaryFixedDim/onPrimaryFixedVariant")
+
+            Section(
+                title = "Background 与 onBackground",
+                desc = listOf(
+                    "background：页面背景色（Scaffold 背景）。",
+                    "onBackground：页面背景上的文本/图标色。",
+                )
+            ) {
+                var useContainer by remember { mutableStateOf(false) }
+                var enabled by remember { mutableStateOf(true) }
+                Row(horizontalArrangement = Arrangement.spacedBy(12.dp), verticalAlignment = Alignment.CenterVertically) {
+                    LabeledSwitch("启用输入", enabled) { enabled = it }
+                    LabeledSwitch("容器变体", useContainer) { useContainer = it }
+                    val bg = if (useContainer) colors.surfaceContainer else colors.background
+                    val fg = if (useContainer) colors.onSurface else colors.onBackground
+                    Surface(color = bg) {
+                        Box(modifier = Modifier.size(220.dp, 80.dp), contentAlignment = Alignment.Center) {
+                            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                                Text("Background", color = fg)
+                                OutlinedTextField(value = textValue, onValueChange = { textValue = it }, enabled = enabled, label = { Text("输入") })
+                            }
+                        }
+                    }
+                }
             }
-            Text("secondaryFixed/Dim：动态色下的次强调固定强度容器；onSecondaryFixed/Variant 为其内容色。")
-            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                Token(colors.secondaryFixed, colors.onSecondaryFixed, "secondaryFixed/onSecondaryFixed")
-                Token(colors.secondaryFixedDim, colors.onSecondaryFixedVariant, "secondaryFixedDim/onSecondaryFixedVariant")
+
+            Section(
+                title = "Outline 与边框",
+                desc = listOf(
+                    "outline：描边主色（Outlined 组件边框等）。",
+                    "outlineVariant：更弱的描边/分隔线（如 Divider）。",
+                    "输入光标（cursor）：默认为 primary；可通过 TextFieldDefaults.colors(cursorColor=...) 自定义。",
+                )
+            ) {
+                Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                    Row(horizontalArrangement = Arrangement.spacedBy(12.dp), verticalAlignment = Alignment.CenterVertically) {
+                        LabeledSwitch("启用", outlinedEnabled) { outlinedEnabled = it }
+                        OutlinedButton(onClick = {}, enabled = outlinedEnabled) { Text("Outlined") }
+                        OutlinedTextField(value = textValue, onValueChange = { textValue = it }, label = { Text("Label") }, enabled = outlinedEnabled)
+                        Token(colors.outline, colors.onSurface, "outline")
+                        Token(colors.outlineVariant, colors.onSurface, "outlineVariant")
+                    }
+                    Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                        Token(colors.primary, colors.onPrimary, "cursor=primary")
+                    }
+                }
             }
-            Text("tertiaryFixed/Dim：动态色下的第三强调固定强度容器；onTertiaryFixed/Variant 为其内容色。")
-            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                Token(colors.tertiaryFixed, colors.onTertiaryFixed, "tertiaryFixed/onTertiaryFixed")
-                Token(colors.tertiaryFixedDim, colors.onTertiaryFixedVariant, "tertiaryFixedDim/onTertiaryFixedVariant")
+
+            Section(
+                title = "错误与反馈",
+                desc = listOf(
+                    "error：错误/警示的强调色。",
+                    "onError：错误容器上的文本/图标色。",
+                    "errorContainer：错误容器背景（提示卡片等）。",
+                    "onErrorContainer：错误容器上的文本/图标色。",
+                )
+            ) {
+                var enabled by remember { mutableStateOf(true) }
+                var useContainer by remember { mutableStateOf(false) }
+                Row(horizontalArrangement = Arrangement.spacedBy(12.dp), verticalAlignment = Alignment.CenterVertically) {
+                    LabeledSwitch("启用", enabled) { enabled = it }
+                    LabeledSwitch("容器变体", useContainer) { useContainer = it }
+                    Button(onClick = {}, enabled = enabled) { Text("正常") }
+                    Button(
+                        onClick = {},
+                        enabled = enabled,
+                        colors = androidx.compose.material3.ButtonDefaults.buttonColors(
+                            containerColor = if (useContainer) colors.errorContainer else colors.error,
+                            contentColor = if (useContainer) colors.onErrorContainer else colors.onError
+                        )
+                    ) { Text("错误") }
+                    Token(colors.error, colors.onError, "error/onError")
+                    Token(colors.errorContainer, colors.onErrorContainer, "errorContainer/onErrorContainer")
+                }
+            }
+            Section(
+                title = "进度条",
+                desc = listOf(
+                    "确定/不确定：不确定不显示进度值，确定需提供 progress(0..1)。",
+                )
+            ) {
+                var determinate by remember { mutableStateOf(false) }
+                var progress by remember { mutableStateOf(0.4f) }
+                Row(horizontalArrangement = Arrangement.spacedBy(12.dp), verticalAlignment = Alignment.CenterVertically) {
+                    LabeledSwitch("确定", determinate) { determinate = it }
+                    if (determinate) {
+                        LinearProgressIndicator(progress = { progress }, modifier = Modifier.size(160.dp, 6.dp))
+                        Slider(value = progress, onValueChange = { progress = it }, valueRange = 0f..1f)
+                    } else {
+                        LinearProgressIndicator(modifier = Modifier.size(160.dp, 6.dp))
+                    }
+                }
+            }
+
+            Section(
+                title = "选择控件",
+                desc = listOf(
+                    "默认选中态使用强调色（通常为 primary）。",
+                )
+            ) {
+                var enabledSel by remember { mutableStateOf(true) }
+                Row(horizontalArrangement = Arrangement.spacedBy(12.dp), verticalAlignment = Alignment.CenterVertically) {
+                    LabeledSwitch("启用", enabledSel) { enabledSel = it }
+                    LabeledSwitch("选中", checked) { checked = it }
+                    Switch(checked = checked, onCheckedChange = { checked = it }, enabled = enabledSel)
+                    Checkbox(checked = checked, onCheckedChange = { checked = it }, enabled = enabledSel)
+                    RadioButton(selected = checked, onClick = { checked = !checked }, enabled = enabledSel)
+                }
+            }
+
+            Section(
+                title = "Snackbar 与 inverse",
+                desc = listOf(
+                    "inverseSurface：反色表面（如 Snackbar 容器）。",
+                    "inverseOnSurface：反色表面上的文本/图标。",
+                    "inversePrimary：反色环境下的强调动作色（如 Snackbar 操作按钮）。",
+                )
+            ) {
+                var enabled by remember { mutableStateOf(true) }
+                var action by remember { mutableStateOf(false) }
+                Row(horizontalArrangement = Arrangement.spacedBy(12.dp), verticalAlignment = Alignment.CenterVertically) {
+                    LabeledSwitch("启用", enabled) { enabled = it }
+                    LabeledSwitch("Action", action) { action = it }
+                    Button(onClick = { if (enabled) snackbarCounter++ }) { Text("显示 Snackbar") }
+                    Token(colors.inverseSurface, colors.inverseOnSurface, "inverseSurface/inverseOnSurface")
+                    Token(colors.inversePrimary, colors.onSurface, "inversePrimary")
+                }
+                LaunchedEffect(snackbarCounter, action) {
+                    if (snackbarCounter > 0) {
+                        hostState.showSnackbar("这是一条消息", actionLabel = if (action) "OK" else null)
+                    }
+                }
+            }
+
+            Section(
+                title = "Scrim 与遮罩",
+                desc = listOf(
+                    "scrim：遮罩层色（模态弹窗/抽屉开启时的背景遮罩）。",
+                )
+            ) {
+                Row(horizontalArrangement = Arrangement.spacedBy(12.dp), verticalAlignment = Alignment.CenterVertically) {
+                    LabeledSwitch("显示遮罩", showOverlay) { showOverlay = it }
+                    Token(colors.scrim, colors.onSurface, "scrim")
+                }
+            }
+
+            Section(
+                title = "Surface 容器层级",
+                desc = listOf(
+                    "surfaceContainer*：容器层级建议色；lowest→highest 表示海拔/层级递增。",
+                )
+            ) {
+                var high by remember { mutableStateOf(false) }
+                Row(horizontalArrangement = Arrangement.spacedBy(12.dp), verticalAlignment = Alignment.CenterVertically) {
+                    LabeledSwitch("高层级", high) { high = it }
+                    val cont = if (high) colors.surfaceContainerHigh else colors.surfaceContainerLow
+                    val txt = colors.onSurface
+                    Surface(color = cont) {
+                        Box(modifier = Modifier.size(180.dp, 60.dp), contentAlignment = Alignment.Center) {
+                            Text(if (high) "High" else "Low", color = txt)
+                        }
+                    }
+                }
+                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    Token(colors.surfaceContainerLowest, colors.onSurface, "lowest")
+                    Token(colors.surfaceContainerLow, colors.onSurface, "low")
+                    Token(colors.surfaceContainer, colors.onSurface, "base")
+                    Token(colors.surfaceContainerHigh, colors.onSurface, "high")
+                    Token(colors.surfaceContainerHighest, colors.onSurface, "highest")
+                }
+            }
+
+            Section(
+                title = "Fixed 颜色展示",
+                desc = listOf(
+                    "*Fixed/*FixedDim：动态色（Android 12+）下的固定强度容器色及其内容色。",
+                )
+            ) {
+                var useFixed by remember { mutableStateOf(true) }
+                Row(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
+                    LabeledSwitch("使用 Fixed", useFixed) { useFixed = it }
+                    val pCont = if (useFixed) colors.primaryFixed else colors.primary
+                    val pText = if (useFixed) colors.onPrimaryFixed else colors.onPrimary
+                    val pDimCont = if (useFixed) colors.primaryFixedDim else colors.primaryContainer
+                    val pDimText = if (useFixed) colors.onPrimaryFixedVariant else colors.onPrimaryContainer
+                    Token(pCont, pText, if (useFixed) "primaryFixed" else "primary")
+                    Token(pDimCont, pDimText, if (useFixed) "primaryFixedDim" else "primaryContainer")
+                }
+                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    val sCont = if (useFixed) colors.secondaryFixed else colors.secondary
+                    val sText = if (useFixed) colors.onSecondaryFixed else colors.onSecondary
+                    val sDimCont = if (useFixed) colors.secondaryFixedDim else colors.secondaryContainer
+                    val sDimText = if (useFixed) colors.onSecondaryFixedVariant else colors.onSecondaryContainer
+                    Token(sCont, sText, if (useFixed) "secondaryFixed" else "secondary")
+                    Token(sDimCont, sDimText, if (useFixed) "secondaryFixedDim" else "secondaryContainer")
+                }
+                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    val tCont = if (useFixed) colors.tertiaryFixed else colors.tertiary
+                    val tText = if (useFixed) colors.onTertiaryFixed else colors.onTertiary
+                    val tDimCont = if (useFixed) colors.tertiaryFixedDim else colors.tertiaryContainer
+                    val tDimText = if (useFixed) colors.onTertiaryFixedVariant else colors.onTertiaryContainer
+                    Token(tCont, tText, if (useFixed) "tertiaryFixed" else "tertiary")
+                    Token(tDimCont, tDimText, if (useFixed) "tertiaryFixedDim" else "tertiaryContainer")
+                }
             }
         }
         if (showOverlay) {
@@ -296,11 +397,7 @@ fun ColorSchemeGallery(onEditClick: (() -> Unit)? = null) {
                 }
             }
         }
-        LaunchedEffect(snackbarCounter) {
-            if (snackbarCounter > 0) {
-                hostState.showSnackbar("这是一条消息")
-            }
-        }
+        
     }
 }
 
@@ -661,6 +758,31 @@ fun SectionTitle(title: String) {
 }
 
 @Composable
+fun Section(title: String, desc: List<String>, content: @Composable () -> Unit) {
+    var expanded by remember { mutableStateOf(false) }
+    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+        Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+            Box(modifier = Modifier.weight(1f)) { SectionTitle(title) }
+            TextButton(onClick = { expanded = !expanded }) { Text(if (expanded) "收起说明" else "展开说明") }
+        }
+        AnimatedVisibility(expanded) {
+            Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
+                desc.forEach { Text(it) }
+            }
+        }
+        content()
+    }
+}
+
+@Composable
+fun LabeledSwitch(text: String, checked: Boolean, onCheckedChange: (Boolean) -> Unit) {
+    Row(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
+        Text(text)
+        Switch(checked = checked, onCheckedChange = onCheckedChange)
+    }
+}
+
+@Composable
 fun Token(bg: Color, fg: Color, label: String) {
     Surface(color = bg, shape = RoundedCornerShape(12.dp)) {
         Box(modifier = Modifier.padding(8.dp).wrapContentSize(), contentAlignment = Alignment.Center) {
@@ -670,11 +792,12 @@ fun Token(bg: Color, fg: Color, label: String) {
 }
 
 @Composable
-fun ElevatedSurfaceSample() {
+fun ElevatedSurfaceSample(elevated: Boolean) {
     val colors = MaterialTheme.colorScheme
-    Card(colors = CardDefaults.elevatedCardColors()) {
+    val cardColors = if (elevated) CardDefaults.elevatedCardColors() else CardDefaults.cardColors()
+    Card(colors = cardColors) {
         Box(modifier = Modifier.padding(8.dp).wrapContentSize(), contentAlignment = Alignment.Center) {
-            Text("Elevated", color = colors.onSurface)
+            Text(if (elevated) "Elevated" else "Flat", color = colors.onSurface)
         }
     }
 }
