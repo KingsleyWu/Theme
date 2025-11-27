@@ -25,6 +25,14 @@ fun SectionTitle(title: String) {
     Text(text = title)
 }
 
+/**
+ * 通用展示区块容器。
+ * 包含标题、可折叠的说明文字区，以及自定义的内容区域。
+ *
+ * @param title 区块标题。
+ * @param desc 说明文字列表，每项显示为一行。
+ * @param content 区块的主要内容。
+ */
 @Composable
 fun Section(title: String, desc: List<String>, content: @Composable () -> Unit) {
     var expanded by remember { mutableStateOf(false) }
@@ -42,6 +50,13 @@ fun Section(title: String, desc: List<String>, content: @Composable () -> Unit) 
     }
 }
 
+/**
+ * 带标签的开关组件。
+ *
+ * @param text 标签文本。
+ * @param checked 开关状态。
+ * @param onCheckedChange 状态变化回调。
+ */
 @Composable
 fun LabeledSwitch(text: String, checked: Boolean, onCheckedChange: (Boolean) -> Unit) {
     Row(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
@@ -50,6 +65,14 @@ fun LabeledSwitch(text: String, checked: Boolean, onCheckedChange: (Boolean) -> 
     }
 }
 
+/**
+ * 颜色 Token 展示组件。
+ * 显示一个带有背景色和前景色（文本）的圆角矩形，用于展示颜色对比。
+ *
+ * @param bg 背景颜色。
+ * @param fg 前景颜色（文本颜色）。
+ * @param label 显示的标签文本。
+ */
 @Composable
 fun Token(bg: Color, fg: Color, label: String) {
     androidx.compose.material3.Surface(color = bg, shape = RoundedCornerShape(12.dp)) {

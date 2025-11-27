@@ -32,6 +32,10 @@ import com.just.theme.util.overlayStateColor
 import kotlinx.coroutines.launch
 import kotlin.math.roundToInt
 
+/**
+ * 包含所有独立的展示区块（Section）。
+ * 每个函数对应 ColorScheme 示例页中的一个卡片，封装了该颜色角色的 UI 展示逻辑。
+ */
 object ControlSections {
     @Composable
     fun ButtonsSection(

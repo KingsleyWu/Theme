@@ -18,31 +18,86 @@ import com.just.theme.util.parseHexColor
 import org.jetbrains.compose.ui.tooling.preview.Preview
 import kotlin.math.roundToInt
 
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ColorLens
+import androidx.compose.material.icons.filled.DarkMode
+import androidx.compose.material.icons.filled.LightMode
+import androidx.compose.material.icons.filled.Share
+import androidx.compose.ui.platform.LocalClipboardManager
+import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.window.Dialog
+import com.materialkolor.dynamicColorScheme
+
+/**
+ * 应用入口点。
+ * 负责管理全局状态（如当前主题颜色、编辑模式状态）以及在“示例页”与“编辑页”之间切换。
+ */
 @Composable
 @Preview
 fun App() {
-    MaterialTheme {
-        var isEditor by remember { mutableStateOf(false) }
-        val initialScheme = MaterialTheme.colorScheme
-        var scheme by remember { mutableStateOf(initialScheme) }
-        MaterialTheme(colorScheme = scheme) {
-            if (isEditor) {
-                ColorEditor(
-                    scheme = scheme,
-                    onSchemeChange = { scheme = it },
-                    onBack = { isEditor = false },
-                    onReset = { scheme = lightColorScheme() }
-                )
-            } else {
-                ColorSchemeGallery(onEditClick = { isEditor = true })
-            }
+    var isEditor by remember { mutableStateOf(false) }
+    var isDark by remember { mutableStateOf(false) }
+    
+    var lightScheme by remember { mutableStateOf(lightColorScheme()) }
+    var darkScheme by remember { mutableStateOf(darkColorScheme()) }
+    
+    // 动态取色相关状态
+    var showSeedPicker by remember { mutableStateOf(false) }
+    
+    if (showSeedPicker) {
+        ColorPickerDialog(
+            initialColor = lightScheme.primary, // 默认使用当前的 primary
+            onConfirm = { seedColor ->
+                lightScheme = dynamicColorScheme(seedColor, isDark = false)
+                darkScheme = dynamicColorScheme(seedColor, isDark = true)
+                showSeedPicker = false
+            },
+            onDismiss = { showSeedPicker = false }
+        )
+    }
+
+    val currentScheme = if (isDark) darkScheme else lightScheme
+    
+    MaterialTheme(colorScheme = currentScheme) {
+        if (isEditor) {
+            ColorEditor(
+                scheme = currentScheme,
+                onSchemeChange = { newScheme -> 
+                    if (isDark) darkScheme = newScheme else lightScheme = newScheme 
+                },
+                onBack = { isEditor = false },
+                onReset = { 
+                    if (isDark) darkScheme = darkColorScheme() else lightScheme = lightColorScheme() 
+                }
+            )
+        } else {
+            ColorSchemeGallery(
+                isDark = isDark,
+                onToggleDark = { isDark = !isDark },
+                onEditClick = { isEditor = true },
+                onPickSeed = { showSeedPicker = true }
+            )
         }
     }
 }
 
+/**
+ * 颜色方案示例页。
+ * 包含多个展示区块（通过 [ControlSections] 调用），逐个演示 Material3 ColorScheme 中各颜色角色的用法。
+ *
+ * @param isDark 当前是否为暗色模式。
+ * @param onToggleDark 切换暗色模式的回调。
+ * @param onEditClick 点击“编辑颜色”按钮时的回调。
+ * @param onPickSeed 点击“动态取色”按钮时的回调。
+ */
 @Composable
 @OptIn(ExperimentalMaterial3Api::class)
-fun ColorSchemeGallery(onEditClick: (() -> Unit)? = null) {
+fun ColorSchemeGallery(
+    isDark: Boolean,
+    onToggleDark: () -> Unit,
+    onEditClick: (() -> Unit)? = null,
+    onPickSeed: (() -> Unit)? = null
+) {
     val colors = MaterialTheme.colorScheme
     var showOverlay by remember { mutableStateOf(false) }
     var textValue by remember { mutableStateOf("") }
@@ -51,9 +106,18 @@ fun ColorSchemeGallery(onEditClick: (() -> Unit)? = null) {
     var iconPaddingGlobal by remember { mutableStateOf(8f) }
     Scaffold(
         topBar = {
-            TopAppBar(title = { Text("ColorScheme 示例") }, actions = {
-                TextButton(onClick = { onEditClick?.invoke() }) { Text("编辑颜色") }
-            })
+            TopAppBar(
+                title = { Text("ColorScheme 示例") },
+                actions = {
+                    IconButton(onClick = { onPickSeed?.invoke() }) {
+                        Icon(Icons.Default.ColorLens, contentDescription = "Dynamic Color")
+                    }
+                    IconButton(onClick = onToggleDark) {
+                        Icon(if (isDark) Icons.Default.LightMode else Icons.Default.DarkMode, contentDescription = "Toggle Dark Mode")
+                    }
+                    TextButton(onClick = { onEditClick?.invoke() }) { Text("编辑颜色") }
+                }
+            )
         }
     ) { paddingValues ->
         Column(
@@ -129,19 +193,38 @@ fun ColorSchemeGallery(onEditClick: (() -> Unit)? = null) {
     }
 }
 
+/**
+ * 颜色编辑页。
+ * 允许用户查看和修改当前 ColorScheme 的所有字段值（以十六进制显示）。
+ * 修改即时生效，并提供“拾色器”功能。
+ *
+ * @param scheme 当前生效的 [ColorScheme]（用于初始填充）。
+ * @param onSchemeChange 当颜色发生变化时的回调，返回新的 [ColorScheme]。
+ * @param onBack 点击“返回示例”时的回调。
+ * @param onReset 点击“重置”按钮时的回调。
+ */
 @Composable
 @OptIn(ExperimentalMaterial3Api::class)
 fun ColorEditor(
     scheme: ColorScheme,
     onSchemeChange: (ColorScheme) -> Unit,
     onBack: () -> Unit,
-    onReset: () -> Unit,
+    onReset: () -> Unit
 ) {
     val s = remember(scheme) { editorStateFromScheme(scheme) }
     var state by remember { mutableStateOf(s) }
+    var showExportDialog by remember { mutableStateOf(false) }
+
+    if (showExportDialog) {
+        ExportCodeDialog(scheme = scheme, onDismiss = { showExportDialog = false })
+    }
+
     Scaffold(
         topBar = {
             TopAppBar(title = { Text("编辑颜色") }, actions = {
+                IconButton(onClick = { showExportDialog = true }) {
+                    Icon(Icons.Default.Share, contentDescription = "Export Code")
+                }
                 TextButton(onClick = onReset) { Text("重置") }
                 TextButton(onClick = onBack) { Text("返回示例") }
             })
@@ -220,6 +303,10 @@ fun ColorEditor(
     }
 }
 
+/**
+ * 用于编辑器的中间状态数据类。
+ * 保存所有颜色字段的十六进制字符串（String），方便在 TextField 中编辑。
+ */
 data class EditableScheme(
     val primary: String,
     val onPrimary: String,
@@ -271,6 +358,10 @@ data class EditableScheme(
     val onTertiaryFixedVariant: String,
 )
 
+/**
+ * 将 [ColorScheme] 转换为 [EditableScheme]。
+ * 将所有 Color 对象转换为十六进制字符串。
+ */
 fun editorStateFromScheme(s: ColorScheme): EditableScheme = EditableScheme(
     primary = colorToHex(s.primary),
     onPrimary = colorToHex(s.onPrimary),
@@ -322,6 +413,10 @@ fun editorStateFromScheme(s: ColorScheme): EditableScheme = EditableScheme(
     onTertiaryFixedVariant = colorToHex(s.onTertiaryFixedVariant),
 )
 
+/**
+ * 将 [EditableScheme] 转换回 [ColorScheme]。
+ * 解析十六进制字符串，如果解析失败则使用默认颜色或回退颜色。
+ */
 fun buildScheme(s: EditableScheme): ColorScheme = ColorScheme(
     primary = parseHexColor(s.primary) ?: Color(0xFF6200EE),
     onPrimary = parseHexColor(s.onPrimary) ?: Color(0xFFFFFFFF),
@@ -445,4 +540,92 @@ fun ColorPickerDialog(
             TextButton(onClick = onDismiss) { Text("取消") }
         }
     )
+}
+
+@Composable
+fun ExportCodeDialog(scheme: ColorScheme, onDismiss: () -> Unit) {
+    val code = remember(scheme) { generateKotlinCode(scheme) }
+    val clipboardManager = LocalClipboardManager.current
+    var copied by remember { mutableStateOf(false) }
+
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text("导出主题代码") },
+        text = {
+            OutlinedTextField(
+                value = code,
+                onValueChange = {},
+                readOnly = true,
+                modifier = Modifier.fillMaxWidth(),
+                label = { Text("Kotlin Code") }
+            )
+        },
+        confirmButton = {
+            TextButton(onClick = {
+                clipboardManager.setText(AnnotatedString(code))
+                copied = true
+            }) {
+                Text(if (copied) "已复制" else "复制")
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) { Text("关闭") }
+        }
+    )
+}
+
+fun generateKotlinCode(s: ColorScheme): String {
+    fun c(color: Color) = "Color(0x${colorToHex(color).replace("#", "")})"
+    return """
+val myScheme = ColorScheme(
+    primary = ${c(s.primary)},
+    onPrimary = ${c(s.onPrimary)},
+    primaryContainer = ${c(s.primaryContainer)},
+    onPrimaryContainer = ${c(s.onPrimaryContainer)},
+    inversePrimary = ${c(s.inversePrimary)},
+    secondary = ${c(s.secondary)},
+    onSecondary = ${c(s.onSecondary)},
+    secondaryContainer = ${c(s.secondaryContainer)},
+    onSecondaryContainer = ${c(s.onSecondaryContainer)},
+    tertiary = ${c(s.tertiary)},
+    onTertiary = ${c(s.onTertiary)},
+    tertiaryContainer = ${c(s.tertiaryContainer)},
+    onTertiaryContainer = ${c(s.onTertiaryContainer)},
+    background = ${c(s.background)},
+    onBackground = ${c(s.onBackground)},
+    surface = ${c(s.surface)},
+    onSurface = ${c(s.onSurface)},
+    surfaceVariant = ${c(s.surfaceVariant)},
+    onSurfaceVariant = ${c(s.onSurfaceVariant)},
+    surfaceTint = ${c(s.surfaceTint)},
+    inverseSurface = ${c(s.inverseSurface)},
+    inverseOnSurface = ${c(s.inverseOnSurface)},
+    error = ${c(s.error)},
+    onError = ${c(s.onError)},
+    errorContainer = ${c(s.errorContainer)},
+    onErrorContainer = ${c(s.onErrorContainer)},
+    outline = ${c(s.outline)},
+    outlineVariant = ${c(s.outlineVariant)},
+    scrim = ${c(s.scrim)},
+    surfaceBright = ${c(s.surfaceBright)},
+    surfaceDim = ${c(s.surfaceDim)},
+    surfaceContainer = ${c(s.surfaceContainer)},
+    surfaceContainerHigh = ${c(s.surfaceContainerHigh)},
+    surfaceContainerHighest = ${c(s.surfaceContainerHighest)},
+    surfaceContainerLow = ${c(s.surfaceContainerLow)},
+    surfaceContainerLowest = ${c(s.surfaceContainerLowest)},
+    primaryFixed = ${c(s.primaryFixed)},
+    primaryFixedDim = ${c(s.primaryFixedDim)},
+    onPrimaryFixed = ${c(s.onPrimaryFixed)},
+    onPrimaryFixedVariant = ${c(s.onPrimaryFixedVariant)},
+    secondaryFixed = ${c(s.secondaryFixed)},
+    secondaryFixedDim = ${c(s.secondaryFixedDim)},
+    onSecondaryFixed = ${c(s.onSecondaryFixed)},
+    onSecondaryFixedVariant = ${c(s.onSecondaryFixedVariant)},
+    tertiaryFixed = ${c(s.tertiaryFixed)},
+    tertiaryFixedDim = ${c(s.tertiaryFixedDim)},
+    onTertiaryFixed = ${c(s.onTertiaryFixed)},
+    onTertiaryFixedVariant = ${c(s.onTertiaryFixedVariant)}
+)
+    """.trimIndent()
 }
