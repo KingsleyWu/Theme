@@ -23,10 +23,10 @@ import androidx.compose.material.icons.filled.ColorLens
 import androidx.compose.material.icons.filled.DarkMode
 import androidx.compose.material.icons.filled.LightMode
 import androidx.compose.material.icons.filled.Share
-import androidx.compose.ui.platform.LocalClipboardManager
-import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.platform.LocalClipboard
 import androidx.compose.ui.window.Dialog
 import com.materialkolor.dynamicColorScheme
+import kotlinx.coroutines.launch
 
 /**
  * 应用入口点。
@@ -545,7 +545,8 @@ fun ColorPickerDialog(
 @Composable
 fun ExportCodeDialog(scheme: ColorScheme, onDismiss: () -> Unit) {
     val code = remember(scheme) { generateKotlinCode(scheme) }
-    val clipboardManager = LocalClipboardManager.current
+    val clipboard = LocalClipboard.current
+    val scope = rememberCoroutineScope()
     var copied by remember { mutableStateOf(false) }
 
     AlertDialog(
@@ -562,8 +563,10 @@ fun ExportCodeDialog(scheme: ColorScheme, onDismiss: () -> Unit) {
         },
         confirmButton = {
             TextButton(onClick = {
-                clipboardManager.setText(AnnotatedString(code))
-                copied = true
+                scope.launch {
+                    clipboard.setClipEntry(code.toClipEntry())
+                    copied = true
+                }
             }) {
                 Text(if (copied) "已复制" else "复制")
             }
