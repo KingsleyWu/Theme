@@ -554,18 +554,26 @@ fun ExportCodeDialog(scheme: ColorScheme, onDismiss: () -> Unit) {
         onDismissRequest = onDismiss,
         title = { Text("导出主题代码") },
         text = {
-            OutlinedTextField(
-                value = code,
-                onValueChange = {},
-                readOnly = true,
-                modifier = Modifier.fillMaxWidth(),
-                label = { Text("Kotlin Code") }
-            )
+            Box(modifier = Modifier.fillMaxWidth()) {
+                OutlinedTextField(
+                    value = code,
+                    onValueChange = {},
+                    readOnly = true,
+                    modifier = Modifier.fillMaxWidth(),
+                    label = { Text("Kotlin Code") }
+                )
+                SnackbarHost(
+                    hostState = hostState,
+                    modifier = Modifier.align(Alignment.BottomCenter)
+                )
+            }
         },
         confirmButton = {
             TextButton(onClick = {
                 scope.launch {
                     clipboard.setClipEntry(code.toClipEntry())
+                }
+                scope.launch {
                     hostState.showSnackbar(message = "已复制", duration = SnackbarDuration.Short)
                 }
             }) {
