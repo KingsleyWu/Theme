@@ -25,6 +25,7 @@ import androidx.compose.material.icons.filled.LightMode
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.ui.platform.LocalClipboard
 import androidx.compose.ui.window.Dialog
+import com.just.theme.util.toClipEntry
 import com.materialkolor.dynamicColorScheme
 import kotlinx.coroutines.launch
 
@@ -547,7 +548,7 @@ fun ExportCodeDialog(scheme: ColorScheme, onDismiss: () -> Unit) {
     val code = remember(scheme) { generateKotlinCode(scheme) }
     val clipboard = LocalClipboard.current
     val scope = rememberCoroutineScope()
-    var copied by remember { mutableStateOf(false) }
+    val hostState = remember { SnackbarHostState() }
 
     AlertDialog(
         onDismissRequest = onDismiss,
@@ -565,10 +566,10 @@ fun ExportCodeDialog(scheme: ColorScheme, onDismiss: () -> Unit) {
             TextButton(onClick = {
                 scope.launch {
                     clipboard.setClipEntry(code.toClipEntry())
-                    copied = true
+                    hostState.showSnackbar(message = "已复制", duration = SnackbarDuration.Short)
                 }
             }) {
-                Text(if (copied) "已复制" else "复制")
+                Text("复制")
             }
         },
         dismissButton = {

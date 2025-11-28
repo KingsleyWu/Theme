@@ -484,10 +484,10 @@ object ControlSections {
                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
                     Text("海拔")
                     Slider(value = previewShadow, onValueChange = { previewShadow = it }, valueRange = 0f..16f, modifier = Modifier.weight(1f))
-                    Text("${'$'}{previewShadow.toInt()}dp")
+                    Text("${previewShadow.toInt()}dp")
                     Text("Tonal")
                     Slider(value = previewTonal, onValueChange = { previewTonal = it }, valueRange = 0f..16f, modifier = Modifier.weight(1f))
-                    Text("${'$'}{previewTonal.toInt()}dp")
+                    Text("${previewTonal.toInt()}dp")
                     Text("描边")
                     Slider(value = previewOutline, onValueChange = { previewOutline = it }, valueRange = 0f..8f, modifier = Modifier.weight(1f))
                     Text(previewOutline.toInt().toString())
@@ -837,7 +837,7 @@ object ControlSections {
                             supportingText = {
                                 val parts = mutableListOf<@Composable () -> Unit>()
                                 if (showHelp) parts.add({ Text("辅助信息示例") })
-                                if (showCounter) parts.add({ Text("${'$'}{textValue.length}/$max") })
+                                if (showCounter) parts.add({ Text("${textValue.length}/$max") })
                                 if (parts.isNotEmpty()) Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) { parts.forEach { it() } }
                             },
                             leadingIcon = { if (leading) Text("@") },
