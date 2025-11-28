@@ -572,8 +572,6 @@ fun ExportCodeDialog(scheme: ColorScheme, onDismiss: () -> Unit) {
             TextButton(onClick = {
                 scope.launch {
                     clipboard.setClipEntry(code.toClipEntry())
-                }
-                scope.launch {
                     hostState.showSnackbar(message = "已复制", duration = SnackbarDuration.Short)
                 }
             }) {
