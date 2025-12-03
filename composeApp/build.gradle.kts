@@ -48,7 +48,10 @@ kotlin {
         commonMain.dependencies {
             implementation(compose.runtime)
             implementation(compose.foundation)
+            implementation(compose.animation)
             implementation(compose.material3)
+            implementation(compose.material3AdaptiveNavigationSuite)
+            implementation(libs.material3.window.size.class1)
             implementation(compose.materialIconsExtended)
             implementation(compose.ui)
             implementation(compose.components.resources)

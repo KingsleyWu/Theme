@@ -1,6 +1,7 @@
 package com.just.theme.util
 
 import androidx.compose.ui.graphics.Color
+import kotlin.math.pow
 import kotlin.math.roundToInt
 
 fun overlayStateColor(base: Color, overlay: Color, alpha: Float): Color =
@@ -48,4 +49,22 @@ fun colorToHex(c: Color): String {
     val b = (c.blue * 255).roundToInt().coerceIn(0, 255)
     fun h(n: Int) = n.toString(16).uppercase().padStart(2, '0')
     return "#${h(a)}${h(r)}${h(g)}${h(b)}"
+}
+
+fun luminance(color: Color): Float {
+    fun linearize(v: Float): Float {
+        return if (v <= 0.04045f) v / 12.92f else ((v + 0.055f) / 1.055f).pow(2.4f)
+    }
+    val r = linearize(color.red)
+    val g = linearize(color.green)
+    val b = linearize(color.blue)
+    return 0.2126f * r + 0.7152f * g + 0.0722f * b
+}
+
+fun contrastRatio(c1: Color, c2: Color): Float {
+    val l1 = luminance(c1)
+    val l2 = luminance(c2)
+    val lighter = maxOf(l1, l2)
+    val darker = minOf(l1, l2)
+    return (lighter + 0.05f) / (darker + 0.05f)
 }

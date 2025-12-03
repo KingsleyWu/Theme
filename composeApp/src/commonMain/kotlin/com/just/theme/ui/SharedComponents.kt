@@ -60,7 +60,7 @@ fun Section(title: String, desc: List<String>, content: @Composable () -> Unit) 
 @Composable
 fun LabeledSwitch(text: String, checked: Boolean, onCheckedChange: (Boolean) -> Unit) {
     Row(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
-        Text(text)
+        Text(text, modifier = Modifier.weight(1f, fill = false))
         Switch(checked = checked, onCheckedChange = onCheckedChange)
     }
 }

@@ -14,9 +14,11 @@ composeMultiplatform = "1.9.3"
 junit = "4.13.2"
 kotlin = "2.2.21"
 kotlinx-coroutines = "1.10.2"
+material3WindowSizeClass = "1.9.0"
 materialKolor = "4.0.5"
 
 [libraries]
+material3-window-size-class1 = { module = "org.jetbrains.compose.material3:material3-window-size-class", version.ref = "material3WindowSizeClass" }
 materialKolor = { module = "com.materialkolor:material-kolor", version.ref = "materialKolor" }
 kotlin-test = { module = "org.jetbrains.kotlin:kotlin-test", version.ref = "kotlin" }
 kotlin-testJunit = { module = "org.jetbrains.kotlin:kotlin-test-junit", version.ref = "kotlin" }
